@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -15,5 +16,12 @@
   "bugs": {
     "url": "https://github.com/jesusfvj/muse-back/issues"
   },
-  "homepage": "https://github.com/jesusfvj/muse-back#readme"
+  "homepage": "https://github.com/jesusfvj/muse-back#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "helmet": "^6.1.5",
+    "mongoose": "^7.1.0"
+  }
 }

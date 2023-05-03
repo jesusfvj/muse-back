@@ -49,20 +49,30 @@ const register = async (req, res) => {
 };
 
 const logInUser = async (req, res) => {
-  const { email, password } = req.body
+  const { email, password } = req.body;
   try {
     const userFromDb = await User.findOne({ email });
-    const comparedPassword = bcrypt.compareSync(password, userFromDb.password);
-    if (!userFromDb || !comparedPassword) {
+
+    if (!userFromDb) {
       return res.status(400).json({
         ok: false,
-        msg: "Email and password don't match."
-      })
+        msg: "Email and password don't match.",
+      });
+    }
+
+    const comparedPassword = bcrypt.compareSync(password, userFromDb.password);
+
+    if (!comparedPassword) {
+      return res.status(400).json({
+        ok: false,
+        msg: "Email and password don't match.",
+      });
     }
     // const token = await generateJWT(userFromDb._id)
+    userFromDb.password = undefined;
     return res.status(200).json({
       ok: true,
-      user: { ...userFromDb} // add token
+      user: userFromDb, // add token
     });
   } catch (error) {
     console.log(error);
@@ -71,6 +81,6 @@ const logInUser = async (req, res) => {
       msg: "Oops, we could not verify your data",
     });
   }
-}
+};
 
 module.exports = { register, logInUser };

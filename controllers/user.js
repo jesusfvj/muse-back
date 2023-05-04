@@ -85,39 +85,33 @@ const logInUser = async (req, res) => {
 };
 
 const followUser = async (req, res) => {
-  const { loggedUserId, followedUserId, isFollowing } = req.body
+  const { loggedUserId, followedUserId, isFollowing } = req.body;
+  console.log(loggedUserId, followedUserId, isFollowing);
   try {
     const loggedUser = await User.findOne({ _id: loggedUserId });
     const followedUser = await User.findOne({ _id: followedUserId });
+
     if (isFollowing) {
       await loggedUser.updateOne({ $push: { following: followedUserId } });
       await followedUser.updateOne({ $push: { followedBy: loggedUserId } });
       return res.status(200).json({
         ok: true,
-        loggedUserId,
-        followedUserId,
-        isFollowing
+        isFollowing,
       });
     } else {
       await loggedUser.updateOne({ $pull: { following: followedUserId } });
       await followedUser.updateOne({ $pull: { followedBy: loggedUserId } });
       return res.status(200).json({
         ok: true,
-        loggedUserId,
-        followedUserId,
-        isFollowing
+        isFollowing,
       });
     }
-
-
   } catch (error) {
     return res.status(503).json({
       ok: false,
       msg: "Oops, something happened",
     });
   }
-}
-
-
+};
 
 module.exports = { register, logInUser, followUser };

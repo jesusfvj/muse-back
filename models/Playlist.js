@@ -6,7 +6,7 @@ const playlistSchema = new mongoose.Schema({
     required: true,
   },
   user: {
-    type: [mongoose.Schema.Types.ObjectId],
+    type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
   },
@@ -14,6 +14,7 @@ const playlistSchema = new mongoose.Schema({
     type: [mongoose.Schema.Types.ObjectId],
     ref: "Track",
     required: true,
+    default: []
   },
   followedBy: {
     type: [mongoose.Schema.Types.ObjectId],
@@ -23,6 +24,11 @@ const playlistSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  thumbnail:{
+    type: String,
+    required: false,
+    default: ""
+  }
 });
 
 const Playlist = mongoose.model("Playlist", playlistSchema);

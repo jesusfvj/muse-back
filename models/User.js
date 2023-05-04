@@ -1,6 +1,6 @@
-const { Schema, model } = require("mongoose");
+const mongoose = require("mongoose");
 
-const UserSchema = Schema({
+const UserSchema =  new mongoose.Schema({
   email: {
     type: String,
     required: true,
@@ -19,31 +19,31 @@ const UserSchema = Schema({
     required: false,
   },
   following: {
-    type: [Schema.Types.ObjectId],
+    type: [mongoose.Schema.Types.ObjectId],
     ref: "User",
     required: true,
     default: [],
   },
   followedBy: {
-    type: [Schema.Types.ObjectId],
+    type: [mongoose.Schema.Types.ObjectId],
     ref: "User",
     required: true,
     default: [],
   },
   albums: {
-    type: [Schema.Types.ObjectId],
+    type: [mongoose.Schema.Types.ObjectId],
     ref: "Album",
     required: false,
     default: [],
   },
   playlists: {
-    type: [Schema.Types.ObjectId],
+    type: [mongoose.Schema.Types.ObjectId],
     ref: "Playlist",
     required: true,
     default: [],
   },
   tracks: {
-    type: [Schema.Types.ObjectId],
+    type: [mongoose.Schema.Types.ObjectId],
     ref: "Track",
     required: true,
     default: [],
@@ -54,6 +54,10 @@ const UserSchema = Schema({
     default: "user",
     required: true,
   },
+  profilePhoto: {
+    type: String,
+    required: false,
+  }
 });
-
-module.exports = model("User", UserSchema);
+const User = mongoose.model("User", UserSchema);
+module.exports = User;

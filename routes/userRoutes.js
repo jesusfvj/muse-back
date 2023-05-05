@@ -1,6 +1,11 @@
 const express = require("express");
 const userRouter = express.Router();
-const { register, logInUser, followUser } = require("../controllers/user");
+const {
+  register,
+  logInUser,
+  followUser,
+  getUserById,
+} = require("../controllers/user");
 
 // Register body = { fullName, email, password, repPassword, isArtist }
 userRouter.post("/register", register);
@@ -8,7 +13,7 @@ userRouter.post("/register", register);
 userRouter.post("/login", logInUser);
 // FollowUser body = { loggedUserId, followedUserId, isFollowing:Boolean }
 userRouter.post("/followUser", followUser);
-
+userRouter.get("/:id", getUserById);
 
 // userRouter.delete("/delete", deleteUser);
 

@@ -114,4 +114,36 @@ const followUser = async (req, res) => {
   }
 };
 
-module.exports = { register, logInUser, followUser };
+const getUserById = async (req, res) => {
+  const { id } = req.params;
+
+  if (id.length !== 24) {
+    return res.status(200).json({
+      ok: false,
+    });
+  }
+
+  try {
+    const user = await User.findOne({ _id: id });
+    if (!user) {
+      return res.status(200).json({
+        ok: false,
+      });
+    }
+
+    user.password = undefined;
+
+    return res.status(200).json({
+      ok: true,
+      user,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(503).json({
+      ok: false,
+      msg: `Could not find the user with the id: ${id}`,
+    });
+  }
+};
+
+module.exports = { register, logInUser, followUser, getUserById };

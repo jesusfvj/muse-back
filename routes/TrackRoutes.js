@@ -1,10 +1,11 @@
 const express = require("express");
 const trackRouter = express.Router();
-const { addTracks } = require("../controllers/track");
+const { likeTracks, getTracks } = require("../controllers/track");
 
 
 // addPlaylist body = { loggedUserId, playlistId, isAdded:Boolean }
-trackRouter.post("/addToLibrary", addTracks);
+trackRouter.post("/likeTracks", likeTracks);
+trackRouter.get("/getTracks", getTracks);
 
 
 module.exports = trackRouter;

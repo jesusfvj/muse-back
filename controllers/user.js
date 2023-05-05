@@ -107,7 +107,23 @@ const followUser = async (req, res) => {
     });
   }
 }
+const getArtists = async (req,res) => {
+  const { loggedUserId } = req.body
+  try {
+    const artists = await User.findOne({ role: "artist", _id: { $ne: loggedUserId } }).select("_id fullName following followedBy profilePhoto ");;
+    return res.status(200).json({
+      ok: true,
+      artists
+    });
+  } catch (error) {
+    return res.status(503).json({
+      ok: false,
+      msg: "Oops, something happened",
+    });
+  }
+
+}
 
 
 
-module.exports = { register, logInUser, followUser, addTracks };
+module.exports = { register, logInUser, followUser, getArtists };

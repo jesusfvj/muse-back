@@ -19,6 +19,7 @@ const playlistSchema = new mongoose.Schema({
   followedBy: {
     type: [mongoose.Schema.Types.ObjectId],
     ref: "User",
+    default:[]
   },
   isPrivate: {
     type: Boolean,

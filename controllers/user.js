@@ -3,11 +3,36 @@ const Playlist = require("../models/Playlist");
 const User = require("../models/User");
 const mongoose = require("mongoose");
 // const generateJWT = require("generateJWT");
+const nodemailer = require("nodemailer");
+require("dotenv").config();
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: "muse.team.assembler@gmail.com",
+    pass: process.env.PASS,
+  },
+});
 
 const register = async (req, res) => {
   const { fullName, email, password, repPassword, isArtist } = req.body;
 
+  const mailOptions = {
+    from: "muse.team.assembler@gmail.com",
+    to: email,
+    subject: "Muze team",
+    text: `Hi ${fullName}, thanks for registering Muze!`,
+  };
+
   try {
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log("Email sent: " + info.response);
+      }
+    });
+
     const user = await User.findOne({ email });
 
     if (user) {

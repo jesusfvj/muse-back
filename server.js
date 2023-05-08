@@ -7,6 +7,7 @@ const playlistRouter = require("./routes/PlaylistRoutes");
 const trackRouter = require("./routes/TrackRoutes");
 const multer = require('multer');
 const searchRouter = require("./routes/SearchRoutes");
+const searchRouter = require("./routes/SearchRoutes");
 
 const app = express();
 

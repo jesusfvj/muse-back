@@ -1,5 +1,5 @@
 require("dotenv").config();
-import {v2 as cloudinary} from "cloudinary";
+const cloudinary = require("cloudinary").v2;
 
 cloudinary.config({
     cloud_name: process.env.CLOUD_NAME,
@@ -8,8 +8,19 @@ cloudinary.config({
     secure: true
   });
 
-export const uploadImage = async (filePath) => {
+const uploadImage = async (filePath) => {
     return await cloudinary.uploader.upload(filePath,{
-        folder: "muze"
+        folder: "muze-song_image"
     })
+}
+
+const uploadSong = async (filePath) => {
+    return await cloudinary.uploader.upload(filePath,{
+        folder: "muze-song_file"
+    })
+}
+
+module.exports = {
+    uploadImage,
+    uploadSong
 }

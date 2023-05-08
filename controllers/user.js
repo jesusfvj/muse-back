@@ -5,6 +5,7 @@ const User = require("../models/User");
 
 const register = async (req, res) => {
   const { fullName, email, password, repPassword, isArtist } = req.body;
+  
 
   try {
     const user = await User.findOne({ email });
@@ -145,5 +146,27 @@ const getUserById = async (req, res) => {
     });
   }
 };
+// const userExists = async (req, res) => {
+//   try {
+//     const user = await User.findOne({ username: req.body.username });
+//     if (!user) {
+//       return res.status(404).json({ message: 'User not found' });
+//     }
+//     res.locals.user = user;
+//   } catch (error) {
+//     return res.status(500).json({ message: error.message });
+//   }
+// };
+
+// const updateUser = async (req, res) => {
+//   try {
+//     const { user } = res.locals;
+//     user.password = req.body.password;
+//     await user.save();
+//     return res.status(200).json(user);
+//   } catch (error) {
+//     return res.status(500).json({ message: error.message });
+//   }
+// };
 
 module.exports = { register, logInUser, followUser, getUserById };

@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const Playlist = require("../models/Playlist");
 const User = require("../models/User");
+const mongoose = require("mongoose");
 // const generateJWT = require("generateJWT");
 
 const register = async (req, res) => {
@@ -146,5 +147,26 @@ const getUserById = async (req, res) => {
   }
 };
 
+const getArtists = async (req, res) => {
+  const { id } = req.params;
+  const objectId = new mongoose.Types.ObjectId(id);
 
-module.exports = { register, logInUser, followUser, getUserById };
+  try {
+    const artists = await User.find({
+      _id: { $ne: objectId },
+      role: "artist",
+    });
+
+    return res.status(200).json({
+      ok: true,
+      artists,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(503).json({
+      ok: false,
+    });
+  }
+};
+
+module.exports = { register, logInUser, followUser, getUserById, getArtists };

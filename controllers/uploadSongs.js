@@ -1,5 +1,4 @@
 const { uploadImage, uploadSong } = require("../utils/cloudinary");
-const multiparty = require("multiparty")
 
 const register = async (req, res) => {
 

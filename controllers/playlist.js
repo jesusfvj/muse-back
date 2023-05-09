@@ -176,7 +176,7 @@ const isPrivate = async (req, res) => {
         message: "You are not the owner of this playlist",
       });
     }
-    await playlistToUpdate.updateOne({ isPrivate: !isPrivate });
+    await playlistToUpdate.updateOne({ isPrivate: false });
     return res.status(200).json({
       ok: true,
       playlistToUpdate,

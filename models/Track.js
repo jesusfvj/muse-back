@@ -44,8 +44,8 @@ const trackSchema = new mongoose.Schema({
     required: true,
   },
   album: {
-    type: String,
-    required: false,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Album"
   }
 });
 

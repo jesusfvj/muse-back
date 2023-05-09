@@ -1,13 +1,15 @@
+const fs = require('fs-extra');
 const Track = require('../models/Track')
+const Album = require('../models/Album')
 const {
     uploadImage,
     uploadSong,
     deleteImage
 } = require("../utils/cloudinary");
 const {
-    grouperDataFunction
-} = require('../utils/groupData');
-const fs = require('fs-extra');
+    grouperDataFunction,
+    deleteFilesFromUploadFolder
+} = require('../utils/uploadNewSongsFunctions');
 
 
 const addTracks = async (req, res) => {
@@ -61,30 +63,101 @@ const uploadNewSongs = async (req, res) => {
     try {
         const dataFiles = req.body
         const userId = req.params.userId
+
+        if (!req.files) {
+            return res.status(503).json({
+                ok: false,
+                msg: "No files uploaded",
+            });
+        }
+
         if (req.files) {
+            const arrayIdTracks = []
+            let albumThumbnailUrl = ""
+            let albumCloudinaryId = ""
+            let albumNameNewAlbmum = ""
+
             const filteredFiles = grouperDataFunction(req.files)
-            console.log(filteredFiles)
-            filteredFiles.map(async ({ audio, image }, index) => {
-                const { songTitle, genre, albumName } = JSON.parse(dataFiles[`dataFile${index+1}`])
+
+            await Promise.all(filteredFiles.map(async ({
+                audio,
+                image
+            }, index) => {
+                const {
+                    songTitle,
+                    genre,
+                    albumName
+                } = JSON.parse(dataFiles[`dataFile${index+1}`])
+
                 const newTrack = new Track({
                     name: songTitle,
                     genre: genre,
                     artist: userId,
-                    album: albumName ? albumName : null
                 })
+
                 const resultImage = await uploadImage(image.path)
                 newTrack.thumbnailUrl = resultImage.secure_url
+                albumThumbnailUrl = resultImage.secure_url
                 newTrack.thumbnailCloudinaryId = resultImage.public_id
+                albumCloudinaryId = resultImage.public_id
 
                 const resultSong = await uploadSong(audio.path)
                 newTrack.trackUrl = resultSong.secure_url
                 newTrack.trackCloudinaryId = resultSong.public_id
 
+                if (!resultImage && !resultSong) {
+                    deleteFilesFromUploadFolder();
+                    return res.status(503).json({
+                        ok: false,
+                        msg: "There was a problem uploading the files",
+                    });
+                }
+
                 await fs.unlink(image.path)
                 await fs.unlink(audio.path)
 
+                if (albumName) {
+                    albumNameNewAlbmum = albumName
+                    arrayIdTracks.push(newTrack._id)
+                }
+
                 await newTrack.save();
-            })
+            }))
+
+            if (arrayIdTracks.length !== 0) {
+                const newAlbum = new Album({
+                    name: albumNameNewAlbmum,
+                    artist: userId,
+                    /* genre */
+                    thumbnailUrl: albumThumbnailUrl,
+                    thumbnailCloudinaryId: albumCloudinaryId,
+                    songs: arrayIdTracks
+                })
+
+                await newAlbum.save();
+
+                try {
+                    const update = {
+                        $set: {
+                            album: newAlbum._id
+                        }
+                    };
+
+                    const result = await Track.updateMany({
+                        _id: {
+                            $in: arrayIdTracks
+                        }
+                    }, update, {
+                        new: true
+                    });
+                    
+                } catch (error) {
+                    return res.status(503).json({
+                        ok: false,
+                        msg: "Error updating values",
+                    });
+                }
+            }
         }
 
         return res.status(200).json({

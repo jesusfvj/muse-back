@@ -13,12 +13,17 @@ const albumSchema = new mongoose.Schema({
   uploadedAt: {
     type: Date,
     required: true,
+    default: Date.now,
   },
   genre: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Genre",
   },
-  thumbnail: {
+  thumbnailUrl: {
+    type: String,
+    required: true,
+  },
+  thumbnailCloudinaryId: {
     type: String,
     required: true,
   },

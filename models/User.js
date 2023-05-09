@@ -36,6 +36,12 @@ const UserSchema = new mongoose.Schema({
     required: false,
     default: [],
   },
+  followedPlaylists: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: "Playlist",
+    required: true,
+    default: [],
+  },
   playlists: {
     type: [mongoose.Schema.Types.ObjectId],
     ref: "Playlist",

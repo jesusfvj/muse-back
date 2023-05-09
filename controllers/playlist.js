@@ -218,6 +218,70 @@ const isPrivate = async (req, res) => {
     });
   }
 };
+const addTracks = async (req, res) => {
+  const { loggedUserId, playlistId, trackId, isAdded } = req.body
+  try {
+    const playlistToUpdate = await Playlist.findOne({ _id: playlistId });
+    if (!playlistToUpdate) {
+      return res.status(401).json({
+        ok: false,
+        message: "Error, this playlist doesn't exist",
+      })
+    }
+    if (playlistToUpdate.user.toString() !== loggedUserId) {
+      return res.status(401).json({
+        ok: false,
+        message: "You are not the owner of this playlist",
+      })
+    }
+    await playlistToUpdate.updateOne({ $addToSet: { tracks: { $each: trackId } } });
+    return res.status(200).json({
+      ok: true,
+      playlistId,
+      addedTracks: trackId
+    });
+  } catch (error) {
+    return res.status(503).json({
+      ok: false,
+      msg: "Oops, something happened",
+    });
+  }
+}
+
+const duplicatePlaylist = async (req, res) => {
+  const { loggedUserId, playlistId, } = req.body
+  try {
+    const playlistToDuplicate = await Playlist.findOne({ _id: playlistId });
+    if (playlistToDuplicate.user.toString() === loggedUserId) {
+      return res.status(400).json({
+        ok: false,
+        msg: "This is actually your playlist",
+      });
+    }
+    if (playlistToDuplicate.isPrivate === true) {
+      return res.status(401).json({
+        ok: false,
+        msg: "This playlist is private!! How did you get there?",
+      });
+    }
+    const newPlaylist = new Playlist({
+      name: playlistToDuplicate.name,
+      user: loggedUserId,
+      thumbnail: playlistToDuplicate.thumbnail,
+      tracks: playlistToDuplicate.tracks
+    });
+    await newPlaylist.save();
+    return res.status(201).json({
+      ok: true,
+      newPlaylist,
+    });
+  } catch (error) {
+    return res.status(503).json({
+      ok: false,
+      msg: "Oops, something happened",
+    });
+  }
+}
 module.exports = {
   getPlaylists,
   getPlaylistById,
@@ -226,4 +290,6 @@ module.exports = {
   deletePlaylist,
   createPlaylist,
   isPrivate,
+  duplicatePlaylist,
+  addTracks
 };

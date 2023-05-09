@@ -8,6 +8,9 @@ const {
   getPlaylists,
   getPlaylistById,
   isPrivate,
+  addTracks,
+  duplicatePlaylist,
+  isPrivate,
 } = require("../controllers/playlist");
 
 playlistRouter.get("/", getPlaylists);
@@ -22,6 +25,8 @@ playlistRouter.post("/delete", deletePlaylist);
 // Update = { loggedUserId, playlistId, newName:Optional, thumbnailUrl:Optional, action="update" }
 playlistRouter.put("/update", updatePlaylist);
 playlistRouter.put("/togglevisibility", isPrivate);
+playlistRouter.put("/addToPlaylist", addTracks);
+playlistRouter.put("/duplicatePlaylist", duplicatePlaylist);
 
 // userRouter.delete("/delete", deleteUser);
 

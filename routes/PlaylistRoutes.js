@@ -12,6 +12,7 @@ playlistRouter.post("/create", createPlaylist);
 playlistRouter.delete("/delete", deletePlaylist);
 // Update = { loggedUserId, playlistId, newName:Optional, thumbnailUrl:Optional, action="update" } 
 playlistRouter.put("/update", updatePlaylist);
+playlistRouter.put("/isPrivate", isPrivate);
 
 // userRouter.delete("/delete", deleteUser);
 

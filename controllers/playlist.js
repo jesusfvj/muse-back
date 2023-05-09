@@ -82,8 +82,6 @@ const followPlaylists = async (req, res) => {
     }
   }
   
-  
-  
   const updatePlaylist = async (req, res) => {
     const   { loggedUserId, playlistId, newName, thumbnailUrl } = req.body
     try {
@@ -110,4 +108,27 @@ const followPlaylists = async (req, res) => {
       });
     }
 }
-module.exports = {followPlaylists, updatePlaylist, deletePlaylist, createPlaylist}
+const isPrivate = async (req, res) => {
+  const { loggedUserId, playlistId, isPrivate, } = req.body
+  try {
+    const playlistToUpdate = await Playlist.findOne({ _id: playlistId });
+    if (playlistToUpdate.user.toString() !== loggedUserId) {
+      return res.status(401).json({
+        ok: false,
+        message: "You are not the owner of this playlist",
+      });
+    }
+    await playlistToUpdate.updateOne({ isPrivate: isPrivate });
+    return res.status(200).json({
+      ok: true,
+      playlistId,
+      isPrivate
+    });
+  } catch (error) {
+    return res.status(503).json({
+      ok: false,
+      msg: "Oops, something happened",
+    });
+  }
+}
+module.exports = {followPlaylists, updatePlaylist, deletePlaylist, createPlaylist, isPrivate}

@@ -165,6 +165,29 @@ const getPlaylistById = async (req, res) => {
     });
   }
 };
+const isPrivate = async (req, res) => {
+  const { loggedUserId, playlistId, isPrivate, } = req.body
+  try {
+    const playlistToUpdate = await Playlist.findOne({ _id: playlistId });
+    if (playlistToUpdate.user.toString() !== loggedUserId) {
+      return res.status(401).json({
+        ok: false,
+        message: "You are not the owner of this playlist",
+      });
+    }
+    await playlistToUpdate.updateOne({ isPrivate: isPrivate });
+    return res.status(200).json({
+      ok: true,
+      playlistId,
+      isPrivate
+    });
+  } catch (error) {
+    return res.status(503).json({
+      ok: false,
+      msg: "Oops, something happened",
+    });
+  }
+}
 module.exports = {
   getPlaylists,
   getPlaylistById,
@@ -172,4 +195,5 @@ module.exports = {
   updatePlaylist,
   deletePlaylist,
   createPlaylist,
+  isPrivate,
 };

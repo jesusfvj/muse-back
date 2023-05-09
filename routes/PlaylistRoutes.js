@@ -9,7 +9,7 @@ const {
   getPlaylistById,
   isPrivate,
   addTracks,
-  duplicatePlaylist
+  duplicatePlaylist,
   isPrivate,
 } = require("../controllers/playlist");
 

@@ -97,7 +97,7 @@ const createPlaylist = async (req, res) => {
 
 const deletePlaylist = async (req, res) => {
   const { loggedUserId, playlistId } = req.body;
-
+  console.log(loggedUserId, playlistId);
   try {
     const loggedUser = await User.findOne({ _id: loggedUserId });
     const playlistToDelete = await Playlist.findOne({ _id: playlistId });
@@ -114,7 +114,12 @@ const deletePlaylist = async (req, res) => {
         deletedPlaylist,
       });
     });
+    await User.updateMany(
+      { followedPlaylists: playlistId },
+      { $pull: { followedPlaylists: playlistId } }
+    );
   } catch (error) {
+    console.log(error);
     return res.status(503).json({
       ok: false,
       msg: "Oops, something happened",
@@ -180,6 +185,7 @@ const getPlaylistById = async (req, res) => {
     });
   }
 };
+
 const isPrivate = async (req, res) => {
   const { loggedUserId, playlistId, isPrivate } = req.body;
 
@@ -195,7 +201,10 @@ const isPrivate = async (req, res) => {
     await playlistToUpdate.updateOne({ isPrivate: !isPrivate });
 
     if (!isPrivate) {
-      //delete list from all users
+      await User.updateMany(
+        { followedPlaylists: playlistId },
+        { $pull: { followedPlaylists: playlistId } }
+      );
     }
 
     return res.status(200).json({

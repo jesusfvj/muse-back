@@ -10,7 +10,6 @@ const {
   isPrivate,
   addTracks,
   duplicatePlaylist,
-  isPrivate,
 } = require("../controllers/playlist");
 
 playlistRouter.get("/", getPlaylists);

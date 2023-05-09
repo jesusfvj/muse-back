@@ -20,12 +20,19 @@ const getPlaylists = async (req, res) => {
 
 const followPlaylists = async (req, res) => {
   const { loggedUserId, playlistId, isAdded } = req.body;
+
   try {
     const loggedUser = await User.findOne({ _id: loggedUserId });
     if (isAdded) {
       await loggedUser.updateOne({
-        $addToSet: { playlists: { $each: playlistId } },
+        $addToSet: { followedPlaylists: { $each: [playlistId] } },
       });
+
+      await Playlist.findOneAndUpdate(
+        { _id: playlistId },
+        { $addToSet: { followedBy: { $each: [loggedUserId] } } }
+      );
+
       return res.status(200).json({
         ok: true,
         loggedUserId,
@@ -33,7 +40,14 @@ const followPlaylists = async (req, res) => {
         isAdded,
       });
     } else {
-      await loggedUser.updateOne({ $pull: { playlists: { $in: playlistId } } });
+      await loggedUser.updateOne({
+        $pull: { followedPlaylists: { $in: playlistId } },
+      });
+
+      await Playlist.findOneAndUpdate(
+        { _id: playlistId },
+        { $pull: { followedBy: { $in: loggedUserId } } }
+      );
       return res.status(200).json({
         ok: true,
         loggedUserId,
@@ -42,6 +56,7 @@ const followPlaylists = async (req, res) => {
       });
     }
   } catch (error) {
+    console.log(error);
     return res.status(503).json({
       ok: false,
       msg: "Oops, something happened",
@@ -166,20 +181,26 @@ const getPlaylistById = async (req, res) => {
   }
 };
 const isPrivate = async (req, res) => {
-  const { loggedUserId, playlistId, isPrivate, } = req.body
+  const { loggedUserId, playlistId, isPrivate } = req.body;
+
   try {
     const playlistToUpdate = await Playlist.findOne({ _id: playlistId });
+
     if (playlistToUpdate.user.toString() !== loggedUserId) {
       return res.status(401).json({
         ok: false,
         message: "You are not the owner of this playlist",
       });
     }
-    await playlistToUpdate.updateOne({ isPrivate: isPrivate });
+    await playlistToUpdate.updateOne({ isPrivate: !isPrivate });
+
+    if (!isPrivate) {
+      //delete list from all users
+    }
+
     return res.status(200).json({
       ok: true,
-      playlistId,
-      isPrivate
+      playlistToUpdate,
     });
   } catch (error) {
     return res.status(503).json({
@@ -187,7 +208,7 @@ const isPrivate = async (req, res) => {
       msg: "Oops, something happened",
     });
   }
-}
+};
 const addTracks = async (req, res) => {
   const { loggedUserId, playlistId, trackId, isAdded } = req.body
   try {

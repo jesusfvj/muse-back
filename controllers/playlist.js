@@ -4,7 +4,7 @@ const User = require("../models/User");
 const getPlaylists = async (req, res) => {
   try {
     const playlists = await Playlist.find({ isPrivate: false });
-    console.log(playlists);
+
     return res.status(200).json({
       ok: true,
       playlists,
@@ -97,7 +97,7 @@ const createPlaylist = async (req, res) => {
 
 const deletePlaylist = async (req, res) => {
   const { loggedUserId, playlistId } = req.body;
-  console.log(loggedUserId, playlistId);
+
   try {
     const loggedUser = await User.findOne({ _id: loggedUserId });
     const playlistToDelete = await Playlist.findOne({ _id: playlistId });

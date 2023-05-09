@@ -78,7 +78,7 @@ const register = async (req, res) => {
 const logInUser = async (req, res) => {
   const { email, password } = req.body;
   try {
-    const userFromDb = await User.findOne({ email });
+    const userFromDb = await User.findOne({ email }).populate("playlists");
 
     if (!userFromDb) {
       return res.status(400).json({
@@ -150,7 +150,7 @@ const getUserById = async (req, res) => {
   }
 
   try {
-    const user = await User.findOne({ _id: id });
+    const user = await User.findOne({ _id: id }).populate("playlists").populate('followedPlaylists');
     if (!user) {
       return res.status(200).json({
         ok: false,

@@ -6,7 +6,8 @@ const {
   followUser,
   getUserById,
   getArtists,
-  updateUsername
+  updateUsername,
+  getFollowedUsers
 } = require("../controllers/user");
 
 // Register body = { fullName, email, password, repPassword, isArtist }
@@ -16,6 +17,7 @@ userRouter.post("/login", logInUser);
 // FollowUser body = { loggedUserId, followedUserId, isFollowing:Boolean }
 userRouter.post("/followUser", followUser);
 userRouter.get("/artists/:id", getArtists)
+userRouter.get("/followedusers/:id", getFollowedUsers)
 
 userRouter.get("/:id", getUserById);
 

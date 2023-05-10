@@ -6,10 +6,18 @@ const trackSchema = new mongoose.Schema({
     required: true,
   },
   genre: {
+    type: String,
+    required: true,
+  },
+  /* genre: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Genre",
+  }, */
+  trackUrl: {
+    type: String,
+    required: true,
   },
-  url: {
+  trackCloudinaryId: {
     type: String,
     required: true,
   },
@@ -17,7 +25,11 @@ const trackSchema = new mongoose.Schema({
     type: [mongoose.Schema.Types.ObjectId],
     ref: "User",
   },
-  thumbnail: {
+  thumbnailUrl: {
+    type: String,
+    required: true,
+  },
+  thumbnailCloudinaryId: {
     type: String,
     required: true,
   },
@@ -31,8 +43,14 @@ const trackSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
+  album: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Album"
+  }
 });
 
 const Track = mongoose.model("Track", trackSchema);
 
 module.exports = Track;
+
+

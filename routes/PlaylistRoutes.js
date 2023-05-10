@@ -20,7 +20,7 @@ playlistRouter.post("/follow", followPlaylists);
 // Create = { loggedUserId, newName, thumbnailUrl:Optional, action="create" }
 playlistRouter.post("/create", createPlaylist);
 // Delete = { loggedUserId, playlistId, action="delete" }
-playlistRouter.delete("/delete", deletePlaylist);
+playlistRouter.post("/delete", deletePlaylist);
 // Update = { loggedUserId, playlistId, newName:Optional, thumbnailUrl:Optional, action="update" }
 playlistRouter.put("/update", updatePlaylist);
 playlistRouter.put("/togglevisibility", isPrivate);

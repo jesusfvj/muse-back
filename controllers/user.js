@@ -201,8 +201,8 @@ const getFollowedUsers = async (req, res) => {
 
   try {
     const user = await User.findOne({
-      _id: id
-    }).populate('following');
+      _id: id,
+    }).populate("following");
 
     return res.status(200).json({
       ok: true,
@@ -223,21 +223,55 @@ const updateUsername = async (req, res) => {
     const newUser = await User.findOneAndUpdate(
       { _id: userId }, // filter
       { fullName: username }, // update
-      { new: true }, // options
+      { new: true } // options
     );
-    console.log(newUser)
+    console.log(newUser);
     return res.status(200).json({
       ok: true,
       newUser,
     });
-
   } catch (error) {
     console.log(error);
     return res.status(503).json({
       ok: false,
     });
   }
+};
 
-}
+const getArtistById = async (req, res) => {
+    console.log(req.params)
+  const { id } = req.params;
 
-module.exports = { register, logInUser, followUser, getUserById, getArtists, getFollowedUsers, updateUsername };
+  try {
+    const artist = await User.findOne({
+      _id: id,
+    }).populate('tracks').populate('albums');
+  console.log(artist)
+    if (artist.role !== "artist") {
+      return res.status(404).json({
+        ok: false,
+      });
+    }
+
+    return res.status(200).json({
+      ok: true,
+      artist,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(503).json({
+      ok: false,
+    });
+  }
+};
+
+module.exports = {
+  register,
+  logInUser,
+  followUser,
+  getUserById,
+  getArtists,
+  getFollowedUsers,
+  updateUsername,
+  getArtistById,
+};

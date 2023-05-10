@@ -10,96 +10,103 @@ const {
     deleteImage
 } = require("../utils/cloudinary");
 const {
-    grouperDataFunction,
-    deleteFilesFromUploadFolder,
+  grouperDataFunction,
+  deleteFilesFromUploadFolder,
     formatDuration,
-    getAudioDuration
-} = require('../utils/uploadNewSongsFunctions');
+    getAudioDuration,
+} = require("../utils/uploadNewSongsFunctions");
+
+const getTracks = async (req, res) => {
+
+  try {
+    const tracks = await Track.find({}).populate('artist');
+
+    return res.status(200).json({ ok: true, tracks });
+  } catch (error) {
+    console.log(error);
+    return res.status(503).json({
+      ok: false,
+      msg: "Oops, something happened",
+    });
+  }
+};
 
 
 const addTracks = async (req, res) => {
-    const {
+  const { loggedUserId, trackId, isAdded } = req.body;
+  try {
+    const loggedUser = await User.findOne({
+      _id: loggedUserId,
+    });
+    if (isAdded) {
+      await loggedUser.updateOne({
+        $addToSet: {
+          tracks: {
+            $each: trackId,
+          },
+        },
+      });
+      return res.status(200).json({
+        ok: true,
         loggedUserId,
         trackId,
-        isAdded
-    } = req.body
-    try {
-        const loggedUser = await User.findOne({
-            _id: loggedUserId
-        });
-        if (isAdded) {
-            await loggedUser.updateOne({
-                $addToSet: {
-                    tracks: {
-                        $each: trackId
-                    }
-                }
-            });
-            return res.status(200).json({
-                ok: true,
-                loggedUserId,
-                trackId,
-                isAdded
-            });
-        } else {
-            await loggedUser.updateOne({
-                $pull: {
-                    tracks: {
-                        $in: trackId
-                    }
-                }
-            });
-            return res.status(200).json({
-                ok: true,
-                loggedUserId,
-                trackId,
-                isAdded
-            });
-        }
-    } catch (error) {
-        return res.status(503).json({
-            ok: false,
-            msg: "Oops, something happened",
-        });
+        isAdded,
+      });
+    } else {
+      await loggedUser.updateOne({
+        $pull: {
+          tracks: {
+            $in: trackId,
+          },
+        },
+      });
+      return res.status(200).json({
+        ok: true,
+        loggedUserId,
+        trackId,
+        isAdded,
+      });
     }
-}
+  } catch (error) {
+    return res.status(503).json({
+      ok: false,
+      msg: "Oops, something happened",
+    });
+  }
+};
 
 const uploadNewSongs = async (req, res) => {
-    try {
-        const dataFiles = req.body
-        const userId = req.params.userId
+  try {
+    const dataFiles = req.body;
+    const userId = req.params.userId;
 
-        if (!req.files) {
-            return res.status(503).json({
-                ok: false,
-                msg: "No files uploaded",
-            });
-        }
+    if (!req.files) {
+      return res.status(503).json({
+        ok: false,
+        msg: "No files uploaded",
+      });
+    }
 
-        if (req.files) {
-            const arrayIdTracks = []
-            let albumThumbnailUrl = ""
-            let albumCloudinaryId = ""
-            let albumNameNewAlbmum = ""
+    if (req.files) {
+      const arrayIdTracks = [];
+      let albumThumbnailUrl = "";
+      let albumCloudinaryId = "";
+      let albumNameNewAlbmum = "";
 
             //Function to group the files in image-audio pairs inside an object
             const filteredFiles = grouperDataFunction(req.files)
 
-            await Promise.all(filteredFiles.map(async ({
-                audio,
-                image
-            }, index) => {
-                const {
-                    songTitle,
-                    genre,
-                    albumName
-                } = JSON.parse(dataFiles[`dataFile${index+1}`])
+      await Promise.all(
+        filteredFiles.map(async ({ audio, image }, index) => {
+          const { songTitle, genre, albumName } = JSON.parse(
+            dataFiles[`dataFile${index + 1}`]
+          );
 
-                const newTrack = new Track({
-                    name: songTitle,
-                    genre: genre,
-                    artist: userId,
-                })
+          const newTrack = new Track({
+            name: songTitle,
+            genre: genre,
+            artist: userId,
+          });
 
                 //Upload tracks and thumbnails to Cloudinary
                 const resultImage = await uploadImage(image.path)
@@ -134,13 +141,13 @@ const uploadNewSongs = async (req, res) => {
                     });
                 } */
 
-                if (!resultImage && !resultSong) {
-                    deleteFilesFromUploadFolder();
-                    return res.status(503).json({
-                        ok: false,
-                        msg: "There was a problem uploading the files",
-                    });
-                }
+          if (!resultImage && !resultSong) {
+            deleteFilesFromUploadFolder();
+            return res.status(503).json({
+              ok: false,
+              msg: "There was a problem uploading the files",
+            });
+          }
 
                 //Delete the files in the uploads folder
                 await fs.unlink(image.path)
@@ -152,8 +159,9 @@ const uploadNewSongs = async (req, res) => {
                     albumNameNewAlbmum = albumName
                 }
 
-                await newTrack.save();
-            }))
+          await newTrack.save();
+        })
+      );
 
             await User.updateOne(
                 { _id: userId },
@@ -170,7 +178,7 @@ const uploadNewSongs = async (req, res) => {
                     songs: arrayIdTracks
                 })
 
-                await newAlbum.save();
+        await newAlbum.save();
 
                 await User.updateOne(
                     { _id: userId },
@@ -216,6 +224,7 @@ const uploadNewSongs = async (req, res) => {
 };
 
 module.exports = {
-    addTracks,
-    uploadNewSongs
-}
+  addTracks,
+  uploadNewSongs,
+  getTracks,
+};

@@ -112,7 +112,7 @@ const logInUser = async (req, res) => {
 
 const followUser = async (req, res) => {
   const { loggedUserId, followedUserId, isFollowing } = req.body;
-  console.log(loggedUserId, followedUserId, isFollowing);
+  
   try {
     const loggedUser = await User.findOne({ _id: loggedUserId });
     const followedUser = await User.findOne({ _id: followedUserId });

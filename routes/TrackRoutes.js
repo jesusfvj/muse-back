@@ -1,6 +1,6 @@
 const express = require("express");
 const trackRouter = express.Router();
-const { addTracks, uploadNewSongs } = require("../controllers/track");
+const { addTracks, uploadNewSongs, getTracks} = require("../controllers/track");
 const multer = require('multer');
 
 /* const storage = multer.diskStorage({
@@ -14,5 +14,6 @@ const upload = multer({ dest: './uploads' });
 // addPlaylist body = { loggedUserId, playlistId, isAdded:Boolean }
 trackRouter.post("/addToLibrary", addTracks);
 trackRouter.post("/uploadNewSongs/:userId", upload.any(), uploadNewSongs);
+trackRouter.get("/", getTracks );
 
 module.exports = trackRouter;

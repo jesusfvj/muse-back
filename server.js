@@ -7,6 +7,7 @@ const playlistRouter = require("./routes/PlaylistRoutes");
 const trackRouter = require("./routes/TrackRoutes");
 const searchRouter = require("./routes/SearchRoutes");
 const queueRouter = require("./routes/PlayQueue");
+const albumRouter = require("./routes/AlbumRoutes");
 
 const app = express();
 
@@ -19,5 +20,6 @@ app.use("/playlist", playlistRouter);
 app.use("/track", trackRouter);
 app.use("/search", searchRouter);
 app.use("/queue", queueRouter);
+app.use("/album", albumRouter);
 
 module.exports = app;

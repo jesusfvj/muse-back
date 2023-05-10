@@ -1,6 +1,8 @@
-const fs = require('fs-extra');
 const Track = require('../models/Track')
 const Album = require('../models/Album')
+const fs = require('fs-extra');
+const NodeID3 = require('node-id3');
+
 const {
     uploadImage,
     uploadSong,
@@ -8,7 +10,9 @@ const {
 } = require("../utils/cloudinary");
 const {
     grouperDataFunction,
-    deleteFilesFromUploadFolder
+    deleteFilesFromUploadFolder,
+    formatDuration,
+    getAudioDuration
 } = require('../utils/uploadNewSongsFunctions');
 
 
@@ -77,6 +81,7 @@ const uploadNewSongs = async (req, res) => {
             let albumCloudinaryId = ""
             let albumNameNewAlbmum = ""
 
+            //Function to group the files in image-audio pairs inside an object
             const filteredFiles = grouperDataFunction(req.files)
 
             await Promise.all(filteredFiles.map(async ({
@@ -95,15 +100,38 @@ const uploadNewSongs = async (req, res) => {
                     artist: userId,
                 })
 
+                //Upload tracks and thumbnails to Cloudinary
                 const resultImage = await uploadImage(image.path)
                 newTrack.thumbnailUrl = resultImage.secure_url
-                albumThumbnailUrl = resultImage.secure_url
                 newTrack.thumbnailCloudinaryId = resultImage.public_id
+
+                albumThumbnailUrl = resultImage.secure_url
                 albumCloudinaryId = resultImage.public_id
 
                 const resultSong = await uploadSong(audio.path)
                 newTrack.trackUrl = resultSong.secure_url
                 newTrack.trackCloudinaryId = resultSong.public_id
+
+                //Get the duration from the track
+                try {
+                    const tags = NodeID3.read(audio.path);
+                    if (tags.TLEN) {
+                        const formattedDuration = formatDuration(tags.TLEN);
+                        newTrack.duration = formattedDuration;
+                    } else {
+                        const duration = await getAudioDuration(audio.path)
+                        console.log(duration)
+                        const formattedDuration = formatDuration(duration*1000);
+                        newTrack.duration = formattedDuration;
+                    }
+
+                } catch (err) {
+                    console.error(err.message);
+                    return res.status(503).json({
+                        ok: false,
+                        msg: "There was a problem accesing the files",
+                    });
+                }
 
                 if (!resultImage && !resultSong) {
                     deleteFilesFromUploadFolder();
@@ -113,6 +141,7 @@ const uploadNewSongs = async (req, res) => {
                     });
                 }
 
+                //Delete the files in the uploads folder
                 await fs.unlink(image.path)
                 await fs.unlink(audio.path)
 
@@ -136,6 +165,7 @@ const uploadNewSongs = async (req, res) => {
 
                 await newAlbum.save();
 
+                //Update the album field in the tracks with the _id from the just created album
                 try {
                     const update = {
                         $set: {
@@ -150,7 +180,7 @@ const uploadNewSongs = async (req, res) => {
                     }, update, {
                         new: true
                     });
-                    
+
                 } catch (error) {
                     return res.status(503).json({
                         ok: false,

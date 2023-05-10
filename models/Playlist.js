@@ -25,11 +25,14 @@ const playlistSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  thumbnail:{
+  thumbnailUrl: {
     type: String,
-    required: false,
-    default: ""
-  }
+    required: true,
+  },
+  thumbnailCloudinaryId: {
+    type: String,
+    required: true,
+  },
 });
 
 const Playlist = mongoose.model("Playlist", playlistSchema);

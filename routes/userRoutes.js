@@ -5,7 +5,8 @@ const {
   logInUser,
   followUser,
   getUserById,
-  getArtists
+  getArtists,
+  updateUsername
 } = require("../controllers/user");
 
 // Register body = { fullName, email, password, repPassword, isArtist }
@@ -18,6 +19,7 @@ userRouter.get("/artists/:id", getArtists)
 
 userRouter.get("/:id", getUserById);
 
+userRouter.put("/update-username", updateUsername)
 // cambiar nombre de usuario
 // userRouter.put("/:id", userExists, updateUser);
 

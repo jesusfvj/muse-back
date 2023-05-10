@@ -112,7 +112,7 @@ const logInUser = async (req, res) => {
 
 const followUser = async (req, res) => {
   const { loggedUserId, followedUserId, isFollowing } = req.body;
-  
+
   try {
     const loggedUser = await User.findOne({ _id: loggedUserId });
     const followedUser = await User.findOne({ _id: followedUserId });
@@ -150,7 +150,9 @@ const getUserById = async (req, res) => {
   }
 
   try {
-    const user = await User.findOne({ _id: id }).populate("playlists").populate('followedPlaylists');
+    const user = await User.findOne({ _id: id })
+      .populate("playlists")
+      .populate("followedPlaylists");
     if (!user) {
       return res.status(200).json({
         ok: false,
@@ -193,5 +195,32 @@ const getArtists = async (req, res) => {
     });
   }
 };
+const getFollowedUsers = async (req, res) => {
+  const { id } = req.params;
+  const objectId = new mongoose.Types.ObjectId(id);
 
-module.exports = { register, logInUser, followUser, getUserById, getArtists };
+  try {
+    const user = await User.findOne({
+      _id: id
+    }).populate('following');
+
+    return res.status(200).json({
+      ok: true,
+      users: user.following,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(503).json({
+      ok: false,
+    });
+  }
+};
+
+module.exports = {
+  register,
+  logInUser,
+  followUser,
+  getUserById,
+  getArtists,
+  getFollowedUsers,
+};

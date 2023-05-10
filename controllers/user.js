@@ -216,11 +216,28 @@ const getFollowedUsers = async (req, res) => {
   }
 };
 
-module.exports = {
-  register,
-  logInUser,
-  followUser,
-  getUserById,
-  getArtists,
-  getFollowedUsers,
-};
+const updateUsername = async (req, res) => {
+  const { username, userId } = req.body;
+
+  try {
+    const newUser = await User.findOneAndUpdate(
+      { _id: userId }, // filter
+      { fullName: username }, // update
+      { new: true }, // options
+    );
+    console.log(newUser)
+    return res.status(200).json({
+      ok: true,
+      newUser,
+    });
+
+  } catch (error) {
+    console.log(error);
+    return res.status(503).json({
+      ok: false,
+    });
+  }
+
+}
+
+module.exports = { register, logInUser, followUser, getUserById, getArtists, getFollowedUsers, updateUsername };

@@ -1,6 +1,5 @@
 const Album = require("../models/Album");
 const getAlbums = async (req, res) => {
-  console.log("here");
   try {
     const albums = await Album.find({}).populate("artist").populate("songs");
 

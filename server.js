@@ -2,7 +2,6 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const userRouter = require("./routes/userRoutes");
-/* const uploadSongsRouter = require("./routes/uploadSongsRoutes"); */
 const playlistRouter = require("./routes/PlaylistRoutes");
 const trackRouter = require("./routes/TrackRoutes");
 const searchRouter = require("./routes/SearchRoutes");

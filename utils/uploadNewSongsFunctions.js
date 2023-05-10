@@ -15,22 +15,20 @@ const grouperDataFunction = (originalFilesObject) => {
     return Object.values(groupedData);
 }
 
-const deleteFilesFromUploadFolder = () => {
-    const folderPath = '../uploads';
+const deleteFilesFromUploadFolder = (folderPath) => {
     if (fs.existsSync(folderPath)) {
         fs.readdirSync(folderPath).forEach((file) => {
             const curPath = path.join(folderPath, file);
             fs.unlinkSync(curPath);
         });
-        fs.rmdirSync(folderPath);
-        console.log(`Deleted folder: ${folderPath}`);
+        /* fs.rmdirSync(folderPath); */
+        console.log(`Deleted files from: ${folderPath}`);
     }
 }
 
 const formatDuration = (duration) => {
-    console.log(duration)
-    const seconds = Math.floor((duration / 1000) % 60);
-    const minutes = Math.floor(duration / (1000 * 60));
+    const seconds = Math.floor(duration % 60);
+    const minutes = Math.floor(duration / 60);
     return `${minutes}:${String(seconds).padStart(2, '0')}`;
 };
 

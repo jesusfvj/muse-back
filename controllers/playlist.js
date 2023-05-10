@@ -1,6 +1,8 @@
 const Playlist = require("../models/Playlist");
 const User = require("../models/User");
-const { uploadImage } = require("../utils/cloudinary");
+const {
+  uploadImage
+} = require("../utils/cloudinary");
 const fs = require('fs-extra');
 
 const getPlaylists = async (req, res) => {
@@ -94,12 +96,12 @@ const followPlaylists = async (req, res) => {
 
 const createPlaylist = async (req, res) => {
   const {
-      name,
-      isPrivate
+    name,
+    isPrivate
   } = JSON.parse(req.body.imagePlaylistData);
 
-    const userId = req.params.userId
-    const file = req.files[0]
+  const userId = req.params.userId
+  const file = req.files[0]
 
   try {
     if (!file) {
@@ -119,7 +121,8 @@ const createPlaylist = async (req, res) => {
       });
       //Upload thumbnail to Cloudinary
       const resultImage = await uploadImage(file.path)
-      newPlaylist.thumbnailUrl = resultImage.secure_url
+      newPlaylist.color = resultImage.colors[0][0]
+      newPlaylist.thumbnail = resultImage.secure_url
       newPlaylist.thumbnailCloudinaryId = resultImage.public_id
       await newPlaylist.save();
       await loggedUser.updateOne({

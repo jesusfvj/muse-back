@@ -25,7 +25,7 @@ const playlistSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  thumbnailUrl: {
+  thumbnail: {
     type: String,
     required: true,
   },
@@ -33,6 +33,9 @@ const playlistSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  color:{
+    type: String
+  }
 });
 
 const Playlist = mongoose.model("Playlist", playlistSchema);

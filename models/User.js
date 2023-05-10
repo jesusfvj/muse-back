@@ -65,6 +65,18 @@ const UserSchema = new mongoose.Schema({
     required: true,
     default: "https://spanishbit.es/no-profile.jpg",
   },
+  uploadedTracks: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: "Track",
+    required: true,
+    default: [],
+  },
+  uploadedAlbums: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: "Album",
+    required: true,
+    default: [],
+  }
 });
 const User = mongoose.model("User", UserSchema);
 module.exports = User;

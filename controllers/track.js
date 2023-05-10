@@ -1,5 +1,6 @@
 const Track = require('../models/Track')
 const Album = require('../models/Album')
+const User = require('../models/User')
 const fs = require('fs-extra');
 const NodeID3 = require('node-id3');
 
@@ -113,7 +114,7 @@ const uploadNewSongs = async (req, res) => {
                 newTrack.trackCloudinaryId = resultSong.public_id
 
                 //Get the duration from the track
-                try {
+                /* try {
                     const tags = NodeID3.read(audio.path);
                     if (tags.TLEN) {
                         const formattedDuration = formatDuration(tags.TLEN);
@@ -131,7 +132,7 @@ const uploadNewSongs = async (req, res) => {
                         ok: false,
                         msg: "There was a problem accesing the files",
                     });
-                }
+                } */
 
                 if (!resultImage && !resultSong) {
                     deleteFilesFromUploadFolder();
@@ -145,15 +146,21 @@ const uploadNewSongs = async (req, res) => {
                 await fs.unlink(image.path)
                 await fs.unlink(audio.path)
 
+                arrayIdTracks.push(newTrack._id)
+
                 if (albumName) {
                     albumNameNewAlbmum = albumName
-                    arrayIdTracks.push(newTrack._id)
                 }
 
                 await newTrack.save();
             }))
 
-            if (arrayIdTracks.length !== 0) {
+            await User.updateOne(
+                { _id: userId },
+                { $push: { uploadedTracks: arrayIdTracks } }
+              );
+
+            if (albumNameNewAlbmum!=="") {
                 const newAlbum = new Album({
                     name: albumNameNewAlbmum,
                     artist: userId,
@@ -165,6 +172,11 @@ const uploadNewSongs = async (req, res) => {
 
                 await newAlbum.save();
 
+                await User.updateOne(
+                    { _id: userId },
+                    { $push: { uploadedAlbums: newAlbum._id } }
+                  );
+
                 //Update the album field in the tracks with the _id from the just created album
                 try {
                     const update = {
@@ -173,7 +185,7 @@ const uploadNewSongs = async (req, res) => {
                         }
                     };
 
-                    const result = await Track.updateMany({
+                    await Track.updateMany({
                         _id: {
                             $in: arrayIdTracks
                         }
@@ -195,6 +207,7 @@ const uploadNewSongs = async (req, res) => {
         });
 
     } catch (error) {
+        console.log(error)
         return res.status(503).json({
             ok: false,
             msg: "Something happened...",

@@ -10,7 +10,8 @@ cloudinary.config({
 
 const uploadImage = async (filePath) => {
     return await cloudinary.uploader.upload(filePath, {
-        folder: "muze-image_file-folder"
+        folder: "muze-image_file-folder",
+        colors: true
     })
 }
 

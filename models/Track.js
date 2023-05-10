@@ -13,10 +13,10 @@ const trackSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Genre",
   }, */
-  duration: {
+ /*  duration: {
     type: String,
     required: true,
-  },
+  }, */
   trackUrl: {
     type: String,
     required: true,

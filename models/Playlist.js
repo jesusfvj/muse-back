@@ -29,6 +29,10 @@ const playlistSchema = new mongoose.Schema({
     type: String,
     required: false,
     default: ""
+  },
+  copyFrom:{
+    type: mongoose.Schema.Types.ObjectId,
+    required: false
   }
 });
 

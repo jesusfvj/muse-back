@@ -240,9 +240,10 @@ const addTracks = async (req, res) => {
 }
 
 const duplicatePlaylist = async (req, res) => {
-  const { loggedUserId, playlistId, } = req.body
+  const { loggedUserId, playlistId } = req.body
   try {
     const playlistToDuplicate = await Playlist.findOne({ _id: playlistId });
+    const loggedUser = await User.findById(loggedUserId).populate('playlists');
     if (playlistToDuplicate.user.toString() === loggedUserId) {
       return res.status(400).json({
         ok: false,
@@ -255,21 +256,49 @@ const duplicatePlaylist = async (req, res) => {
         msg: "This playlist is private!! How did you get there?",
       });
     }
+    const userPlaylists = loggedUser.playlists;
+    const foundPlaylist = userPlaylists.some(playlist => playlist.copyFrom.toString().includes(playlistId));
+    if (foundPlaylist) {
+
+      const playlist = userPlaylists.find(playlist => playlist.copyFrom.toString() === playlistId);
+      const duplicatedTracksIds = playlist.tracks.map(track => track);
+      const missingTracks = playlistToDuplicate.tracks.filter(track => !duplicatedTracksIds.includes(track));
+
+      if (missingTracks.length !== 0) {
+        playlist.updateOne({ $push: { tracks: { $each: missingTracks } } });
+        return res.status(200).json({
+          ok: true,
+          msg: "This playlist is already in your library. The missing songs have been added to the corresponding playlist.",
+          missingTracks
+        });
+      }
+      return res.status(200).json({
+        ok: false,
+        msg: "This playlist has already been duplicated",
+        playlist: playlist.tracks,
+        playlistToDuplicate: playlistToDuplicate.tracks,
+        missingTracks
+      });
+    }
     const newPlaylist = new Playlist({
-      name: playlistToDuplicate.name,
+      name: `${playlistToDuplicate.name} copy`,
       user: loggedUserId,
       thumbnail: playlistToDuplicate.thumbnail,
-      tracks: playlistToDuplicate.tracks
+      tracks: playlistToDuplicate.tracks,
+      copyFrom: playlistId
     });
     await newPlaylist.save();
+    await loggedUser.updateOne({ $push: { playlists: newPlaylist._id } });
     return res.status(201).json({
       ok: true,
       newPlaylist,
+      loggedUser: loggedUser.playlists
     });
   } catch (error) {
-    return res.status(503).json({
+    return res.status(400).json({
       ok: false,
       msg: "Oops, something happened",
+      error
     });
   }
 }

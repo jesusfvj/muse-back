@@ -6,6 +6,7 @@ const {
   followUser,
   getUserById,
   getArtists,
+  updateUsername,
   getFollowedUsers
 } = require("../controllers/user");
 
@@ -19,6 +20,10 @@ userRouter.get("/artists/:id", getArtists)
 userRouter.get("/followedusers/:id", getFollowedUsers)
 
 userRouter.get("/:id", getUserById);
+
+userRouter.put("/update-username", updateUsername)
+// cambiar nombre de usuario
+// userRouter.put("/:id", userExists, updateUser);
 
 // userRouter.delete("/delete", deleteUser);
 

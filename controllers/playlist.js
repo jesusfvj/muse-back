@@ -233,7 +233,7 @@ const getPlaylistById = async (req, res) => {
   try {
     const playlist = await Playlist.findOne({
       _id: id,
-    }).populate("tracks");
+    }).populate({ path: "tracks", populate: { path: "artist" } });
 
     if (!playlist) {
       return res.status(404).json({
@@ -406,7 +406,6 @@ const duplicatePlaylist = async (req, res) => {
   }
 };
 
-
 const updatePlaylistName = async (req, res) => {
   const { playlistId } = req.params;
   const { namePlaylist } = req.body;
@@ -415,7 +414,7 @@ const updatePlaylistName = async (req, res) => {
     const playlist = await Playlist.findById(playlistId);
 
     if (!playlist) {
-      return res.status(404).json({ message: 'Playlist not found' });
+      return res.status(404).json({ message: "Playlist not found" });
     }
     playlist.name = namePlaylist;
     await playlist.save();
@@ -423,9 +422,9 @@ const updatePlaylistName = async (req, res) => {
     res.status(200).json(playlist);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: "Internal server error" });
   }
-}
+};
 
 module.exports = {
   getPlaylists,

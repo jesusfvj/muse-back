@@ -4,6 +4,8 @@ const User = require("../models/User");
 const mongoose = require("mongoose");
 // const generateJWT = require("generateJWT");
 const nodemailer = require("nodemailer");
+const { uploadImage } = require("../utils/cloudinary");
+const fs = require('fs-extra');
 require("dotenv").config();
 
 const transporter = nodemailer.createTransport({
@@ -15,7 +17,13 @@ const transporter = nodemailer.createTransport({
 });
 
 const register = async (req, res) => {
-  const { fullName, email, password, repPassword, isArtist } = req.body;
+  const {
+    fullName,
+    email,
+    password,
+    repPassword,
+    isArtist
+  } = req.body;
 
   const mailOptions = {
     from: "muse.team.assembler@gmail.com",
@@ -33,7 +41,9 @@ const register = async (req, res) => {
       }
     });
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({
+      email
+    });
 
     if (user) {
       return res.status(409).json({
@@ -76,9 +86,14 @@ const register = async (req, res) => {
 };
 
 const logInUser = async (req, res) => {
-  const { email, password } = req.body;
+  const {
+    email,
+    password
+  } = req.body;
   try {
-    const userFromDb = await User.findOne({ email }).populate("playlists");
+    const userFromDb = await User.findOne({
+      email
+    }).populate("playlists");
 
     if (!userFromDb) {
       return res.status(400).json({
@@ -111,22 +126,46 @@ const logInUser = async (req, res) => {
 };
 
 const followUser = async (req, res) => {
-  const { loggedUserId, followedUserId, isFollowing } = req.body;
+  const {
+    loggedUserId,
+    followedUserId,
+    isFollowing
+  } = req.body;
 
   try {
-    const loggedUser = await User.findOne({ _id: loggedUserId });
-    const followedUser = await User.findOne({ _id: followedUserId });
+    const loggedUser = await User.findOne({
+      _id: loggedUserId
+    });
+    const followedUser = await User.findOne({
+      _id: followedUserId
+    });
 
     if (isFollowing) {
-      await loggedUser.updateOne({ $push: { following: followedUserId } });
-      await followedUser.updateOne({ $push: { followedBy: loggedUserId } });
+      await loggedUser.updateOne({
+        $push: {
+          following: followedUserId
+        }
+      });
+      await followedUser.updateOne({
+        $push: {
+          followedBy: loggedUserId
+        }
+      });
       return res.status(200).json({
         ok: true,
         isFollowing,
       });
     } else {
-      await loggedUser.updateOne({ $pull: { following: followedUserId } });
-      await followedUser.updateOne({ $pull: { followedBy: loggedUserId } });
+      await loggedUser.updateOne({
+        $pull: {
+          following: followedUserId
+        }
+      });
+      await followedUser.updateOne({
+        $pull: {
+          followedBy: loggedUserId
+        }
+      });
       return res.status(200).json({
         ok: true,
         isFollowing,
@@ -141,7 +180,9 @@ const followUser = async (req, res) => {
 };
 
 const getUserById = async (req, res) => {
-  const { id } = req.params;
+  const {
+    id
+  } = req.params;
 
   if (id.length !== 24) {
     return res.status(200).json({
@@ -150,7 +191,9 @@ const getUserById = async (req, res) => {
   }
 
   try {
-    const user = await User.findOne({ _id: id })
+    const user = await User.findOne({
+        _id: id
+      })
       .populate("playlists")
       .populate("followedPlaylists")
       .populate("tracks")
@@ -177,12 +220,16 @@ const getUserById = async (req, res) => {
 };
 
 const getArtists = async (req, res) => {
-  const { id } = req.params;
+  const {
+    id
+  } = req.params;
   const objectId = new mongoose.Types.ObjectId(id);
 
   try {
     const artists = await User.find({
-      _id: { $ne: objectId },
+      _id: {
+        $ne: objectId
+      },
       role: "artist",
     });
 
@@ -198,7 +245,9 @@ const getArtists = async (req, res) => {
   }
 };
 const getFollowedUsers = async (req, res) => {
-  const { id } = req.params;
+  const {
+    id
+  } = req.params;
   const objectId = new mongoose.Types.ObjectId(id);
 
   try {
@@ -219,13 +268,21 @@ const getFollowedUsers = async (req, res) => {
 };
 
 const updateUsername = async (req, res) => {
-  const { username, userId } = req.body;
+  const {
+    username,
+    userId
+  } = req.body;
 
   try {
-    const newUser = await User.findOneAndUpdate(
-      { _id: userId }, // filter
-      { fullName: username }, // update
-      { new: true } // options
+    const newUser = await User.findOneAndUpdate({
+        _id: userId
+      }, // filter
+      {
+        fullName: username
+      }, // update
+      {
+        new: true
+      } // options
     );
     console.log(newUser);
     return res.status(200).json({
@@ -242,12 +299,14 @@ const updateUsername = async (req, res) => {
 
 const getArtistById = async (req, res) => {
   console.log(req.params);
-  const { id } = req.params;
+  const {
+    id
+  } = req.params;
 
   try {
     const artist = await User.findOne({
-      _id: id,
-    })
+        _id: id,
+      })
       .populate("tracks")
       .populate("albums");
 
@@ -275,6 +334,51 @@ const getArtistById = async (req, res) => {
   }
 };
 
+const updateProfileImage = async (req, res) => {
+  const userId = req.params.userId
+  const file = req.files[0]
+
+  try {
+    if (!file) {
+      return res.status(503).json({
+        ok: false,
+        msg: "No files uploaded",
+      });
+    }
+    if (file) {
+      //Upload thumbnail to Cloudinary
+      const resultImage = await uploadImage(file.path)
+      const url = resultImage.secure_url
+      const cloudinaryId = resultImage.public_id
+
+      console.log(userId)
+      console.log(url)
+      console.log(cloudinaryId)
+
+      await User.updateOne({
+        _id: userId
+      }, {
+        $set: {
+          profilePhoto: url,
+          profilePhotoCloudinaryId: cloudinaryId
+        }
+      })
+
+      await fs.unlink(file.path)
+      return res.status(201).json({
+        ok: true,
+        profilePhoto: url,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(503).json({
+      ok: false,
+      msg: "Oops, something happened",
+    });
+  }
+};
+
 module.exports = {
   register,
   logInUser,
@@ -284,4 +388,5 @@ module.exports = {
   getFollowedUsers,
   updateUsername,
   getArtistById,
+  updateProfileImage
 };

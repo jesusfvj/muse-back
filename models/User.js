@@ -65,6 +65,11 @@ const UserSchema = new mongoose.Schema({
     required: true,
     default: "https://spanishbit.es/no-profile.jpg",
   },
+  profilePhotoCloudinaryId: {
+    type: String,
+    required: true,
+    default: "",
+  },
   uploadedTracks: {
     type: [mongoose.Schema.Types.ObjectId],
     ref: "Track",

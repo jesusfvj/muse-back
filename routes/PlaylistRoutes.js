@@ -1,5 +1,5 @@
 const express = require("express");
-const multer = require('multer');
+const multer = require("multer");
 const playlistRouter = express.Router();
 const {
   followPlaylists,
@@ -13,7 +13,7 @@ const {
   duplicatePlaylist,
 } = require("../controllers/playlist");
 
-const upload = multer({ dest: './uploads' });
+const upload = multer({ dest: "./uploads" });
 
 playlistRouter.get("/", getPlaylists);
 playlistRouter.get("/id/:id", getPlaylistById);

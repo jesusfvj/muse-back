@@ -1,28 +1,24 @@
-const Track = require('../models/Track')
-const Album = require('../models/Album')
-const User = require('../models/User')
-const fs = require('fs-extra');
+const Track = require("../models/Track");
+const Album = require("../models/Album");
+const User = require("../models/User");
+const fs = require("fs-extra");
 
-const {
-  uploadImage,
-  uploadSong,
-  deleteImage
-} = require("../utils/cloudinary");
+const { uploadImage, uploadSong, deleteImage } = require("../utils/cloudinary");
 const {
   grouperDataFunction,
   deleteFilesFromUploadFolder,
   formatDuration,
   getAudioDuration,
 } = require("../utils/uploadNewSongsFunctions");
+const Playlist = require("../models/Playlist");
 
 const getTracks = async (req, res) => {
-
   try {
-    const tracks = await Track.find({}).populate('artist');
+    const tracks = await Track.find({}).populate("artist");
 
     return res.status(200).json({
       ok: true,
-      tracks
+      tracks,
     });
   } catch (error) {
     console.log(error);
@@ -33,13 +29,8 @@ const getTracks = async (req, res) => {
   }
 };
 
-
 const addTracks = async (req, res) => {
-  const {
-    loggedUserId,
-    trackId,
-    isAdded
-  } = req.body;
+  const { loggedUserId, trackId, isAdded } = req.body;
   try {
     const loggedUser = await User.findOne({
       _id: loggedUserId,
@@ -105,18 +96,11 @@ const uploadNewSongs = async (req, res) => {
       let albumNameNewAlbmum = "";
 
       //Function to group the files in image-audio pairs inside an object
-      const filteredFiles = grouperDataFunction(req.files)
+      const filteredFiles = grouperDataFunction(req.files);
 
       await Promise.all(
-        filteredFiles.map(async ({
-          audio,
-          image
-        }, index) => {
-          const {
-            songTitle,
-            genre,
-            albumName
-          } = JSON.parse(
+        filteredFiles.map(async ({ audio, image }, index) => {
+          const { songTitle, genre, albumName } = JSON.parse(
             dataFiles[`dataFile${index + 1}`]
           );
 
@@ -127,16 +111,16 @@ const uploadNewSongs = async (req, res) => {
           });
 
           //Upload tracks and thumbnails to Cloudinary
-          const resultImage = await uploadImage(image.path)
-          newTrack.thumbnailUrl = resultImage.secure_url
-          newTrack.thumbnailCloudinaryId = resultImage.public_id
+          const resultImage = await uploadImage(image.path);
+          newTrack.thumbnailUrl = resultImage.secure_url;
+          newTrack.thumbnailCloudinaryId = resultImage.public_id;
 
-          albumThumbnailUrl = resultImage.secure_url
-          albumCloudinaryId = resultImage.public_id
+          albumThumbnailUrl = resultImage.secure_url;
+          albumCloudinaryId = resultImage.public_id;
 
-          const resultSong = await uploadSong(audio.path)
-          newTrack.trackUrl = resultSong.secure_url
-          newTrack.trackCloudinaryId = resultSong.public_id
+          const resultSong = await uploadSong(audio.path);
+          newTrack.trackUrl = resultSong.secure_url;
+          newTrack.trackCloudinaryId = resultSong.public_id;
           //Get the duration of the song from the Cloudinary API
           const formattedDuration = formatDuration(resultSong.duration);
           newTrack.duration = formattedDuration;
@@ -149,26 +133,29 @@ const uploadNewSongs = async (req, res) => {
           }
 
           //Delete the files in the uploads folder
-          await fs.unlink(image.path)
-          await fs.unlink(audio.path)
+          await fs.unlink(image.path);
+          await fs.unlink(audio.path);
 
-          arrayIdTracks.push(newTrack._id)
+          arrayIdTracks.push(newTrack._id);
 
           if (albumName) {
-            albumNameNewAlbmum = albumName
+            albumNameNewAlbmum = albumName;
           }
 
           await newTrack.save();
         })
       );
 
-      await User.updateOne({
-        _id: userId
-      }, {
-        $push: {
-          uploadedTracks: arrayIdTracks
+      await User.updateOne(
+        {
+          _id: userId,
+        },
+        {
+          $push: {
+            uploadedTracks: arrayIdTracks,
+          },
         }
-      });
+      );
 
       if (albumNameNewAlbmum !== "") {
         const newAlbum = new Album({
@@ -177,35 +164,41 @@ const uploadNewSongs = async (req, res) => {
           /* genre */
           thumbnailUrl: albumThumbnailUrl,
           thumbnailCloudinaryId: albumCloudinaryId,
-          songs: arrayIdTracks
-        })
+          songs: arrayIdTracks,
+        });
 
         await newAlbum.save();
 
-        await User.updateOne({
-          _id: userId
-        }, {
-          $push: {
-            uploadedAlbums: newAlbum._id
+        await User.updateOne(
+          {
+            _id: userId,
+          },
+          {
+            $push: {
+              uploadedAlbums: newAlbum._id,
+            },
           }
-        });
+        );
 
         //Update the album field in the tracks with the _id from the just created album
         try {
           const update = {
             $set: {
-              album: newAlbum._id
-            }
+              album: newAlbum._id,
+            },
           };
 
-          await Track.updateMany({
-            _id: {
-              $in: arrayIdTracks
+          await Track.updateMany(
+            {
+              _id: {
+                $in: arrayIdTracks,
+              },
+            },
+            update,
+            {
+              new: true,
             }
-          }, update, {
-            new: true
-          });
-
+          );
         } catch (error) {
           return res.status(503).json({
             ok: false,
@@ -215,16 +208,46 @@ const uploadNewSongs = async (req, res) => {
       }
     }
 
-    deleteFilesFromUploadFolder('../uploads');
+    deleteFilesFromUploadFolder("../uploads");
     return res.status(200).json({
-      ok: true
+      ok: true,
     });
-
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return res.status(503).json({
       ok: false,
       msg: "Something happened...",
+    });
+  }
+};
+
+const getTrackById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const DBtrack = await Track.findOne({ _id: id }).populate("artist");
+    const featuredIn = await Playlist.find({
+      tracks: { $in: id },
+      isPrivate: false,
+    });
+
+    const track = { DBtrack, featuredIn };
+
+    if (!track) {
+      return res.status(503).json({
+        ok: false,
+        msg: "Could not find the track",
+      });
+    }
+    return res.status(200).json({
+      ok: true,
+      track,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(503).json({
+      ok: false,
+      msg: "Something happened",
     });
   }
 };
@@ -233,4 +256,5 @@ module.exports = {
   addTracks,
   uploadNewSongs,
   getTracks,
+  getTrackById,
 };

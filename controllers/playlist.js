@@ -398,13 +398,16 @@ const duplicatePlaylist = async (req, res) => {
       name: `${playlistToDuplicate.name} copy`,
       user: loggedUserId,
       thumbnail: playlistToDuplicate.thumbnail,
+      thumbnailCloudinaryId: playlistToDuplicate.thumbnailCloudinaryId,
       tracks: playlistToDuplicate.tracks,
       copyFrom: playlistId
+
     });
     await newPlaylist.save();
     await loggedUser.updateOne({ $push: { playlists: newPlaylist._id } });
     return res.status(201).json({
       ok: true,
+      msg: `The playlist ${playlistToDuplicate.name} have been duplicated!`,
       newPlaylist,
       loggedUser: loggedUser.playlists
     });

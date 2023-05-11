@@ -1,5 +1,6 @@
 const express = require("express");
 const userRouter = express.Router();
+const multer = require('multer');
 const {
   register,
   logInUser,
@@ -9,7 +10,11 @@ const {
   updateUsername,
   getFollowedUsers,
   getArtistById,
+  updateProfileImage,
+  addToPlaylist,
 } = require("../controllers/user");
+
+const upload = multer({ dest: './uploads' });
 
 // Register body = { fullName, email, password, repPassword, isArtist }
 userRouter.post("/register", register);
@@ -27,9 +32,13 @@ userRouter.get("/followedusers/:id", getFollowedUsers);
 userRouter.get("/:id", getUserById);
 
 userRouter.put("/update-username", updateUsername);
+
+userRouter.put("/uploadProfileImage/:userId", upload.any(), updateProfileImage);
 // cambiar nombre de usuario
 // userRouter.put("/:id", userExists, updateUser);
 
 // userRouter.delete("/delete", deleteUser);
+
+userRouter.post("/playlist/addtrack", addToPlaylist);
 
 module.exports = userRouter;

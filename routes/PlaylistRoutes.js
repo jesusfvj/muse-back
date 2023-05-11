@@ -11,6 +11,7 @@ const {
   isPrivate,
   addTracks,
   duplicatePlaylist,
+  updatePlaylistName
 } = require("../controllers/playlist");
 
 const upload = multer({ dest: './uploads' });
@@ -29,6 +30,8 @@ playlistRouter.put("/update", updatePlaylist);
 playlistRouter.put("/togglevisibility", isPrivate);
 playlistRouter.put("/addToPlaylist", addTracks);
 playlistRouter.post("/duplicatePlaylist", duplicatePlaylist);
+playlistRouter.put('/update/:playlistId', updatePlaylistName);
+
 
 // userRouter.delete("/delete", deleteUser);
 

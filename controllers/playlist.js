@@ -416,6 +416,27 @@ const duplicatePlaylist = async (req, res) => {
     });
   }
 }
+
+const updatePlaylistName = async (req, res) => {
+  const { playlistId } = req.params;
+  const { namePlaylist } = req.body;
+
+  try {
+    const playlist = await Playlist.findById(playlistId);
+
+    if (!playlist) {
+      return res.status(404).json({ message: 'Playlist not found' });
+    }
+    playlist.name = namePlaylist;
+    await playlist.save();
+
+    res.status(200).json(playlist);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}
+
 module.exports = {
   getPlaylists,
   getPlaylistById,
@@ -425,5 +446,6 @@ module.exports = {
   createPlaylist,
   isPrivate,
   duplicatePlaylist,
-  addTracks
+  addTracks,
+  updatePlaylistName
 };

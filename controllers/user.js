@@ -152,7 +152,9 @@ const getUserById = async (req, res) => {
   try {
     const user = await User.findOne({ _id: id })
       .populate("playlists")
-      .populate("followedPlaylists");
+      .populate("followedPlaylists")
+      .populate("tracks")
+      .populate("albums");
     if (!user) {
       return res.status(200).json({
         ok: false,
@@ -239,16 +241,24 @@ const updateUsername = async (req, res) => {
 };
 
 const getArtistById = async (req, res) => {
-    console.log(req.params)
+  console.log(req.params);
   const { id } = req.params;
 
   try {
     const artist = await User.findOne({
       _id: id,
-    }).populate('tracks').populate('albums');
-  console.log(artist)
+    })
+      .populate("tracks")
+      .populate("albums");
+
+    if (!artist) {
+      return res.status(200).json({
+        ok: false,
+      });
+    }
+
     if (artist.role !== "artist") {
-      return res.status(404).json({
+      return res.status(200).json({
         ok: false,
       });
     }

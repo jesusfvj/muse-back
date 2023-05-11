@@ -44,6 +44,9 @@ const addTracks = async (req, res) => {
     const loggedUser = await User.findOne({
       _id: loggedUserId,
     });
+    const track = await Track.findOne({
+      _id: trackId,
+    });
     if (isAdded) {
       await loggedUser.updateOne({
         $addToSet: {
@@ -52,6 +55,7 @@ const addTracks = async (req, res) => {
           },
         },
       });
+      await track.updateOne({$push: {followedBy:loggedUserId}})
       return res.status(200).json({
         ok: true,
         loggedUserId,
@@ -66,6 +70,7 @@ const addTracks = async (req, res) => {
           },
         },
       });
+      await track.updateOne({$pull: {followedBy:loggedUserId}})
       return res.status(200).json({
         ok: true,
         loggedUserId,

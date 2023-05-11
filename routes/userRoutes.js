@@ -9,6 +9,7 @@ const {
   updateUsername,
   getFollowedUsers,
   getArtistById,
+  addToPlaylist,
 } = require("../controllers/user");
 
 // Register body = { fullName, email, password, repPassword, isArtist }
@@ -31,5 +32,7 @@ userRouter.put("/update-username", updateUsername);
 // userRouter.put("/:id", userExists, updateUser);
 
 // userRouter.delete("/delete", deleteUser);
+
+userRouter.post("/playlist/addtrack", addToPlaylist);
 
 module.exports = userRouter;

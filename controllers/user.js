@@ -275,6 +275,32 @@ const getArtistById = async (req, res) => {
   }
 };
 
+const addToPlaylist = async (req, res) => {
+  const { playlistId, trackId } = req.body;
+  try {
+    const playlist = await Playlist.findOne({ _id: playlistId, tracks: trackId });
+
+    if (playlist) {
+      return res
+        .status(503)
+        .json({ ok: false, msg: "Track is already in the list" });
+    }
+
+    await Playlist.findByIdAndUpdate(
+      playlistId,
+      { $addToSet: { tracks: trackId } },
+      { new: true }
+    );
+
+    return res.status(201).json({ ok: true });
+  } catch (error) {
+    console.log(error);
+    return res.status(503).json({
+      ok: false,
+    });
+  }
+};
+
 module.exports = {
   register,
   logInUser,
@@ -284,4 +310,5 @@ module.exports = {
   getFollowedUsers,
   updateUsername,
   getArtistById,
+  addToPlaylist,
 };

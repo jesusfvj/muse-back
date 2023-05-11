@@ -11,6 +11,7 @@ const {
   getFollowedUsers,
   getArtistById,
   updateProfileImage,
+  addToPlaylist,
 } = require("../controllers/user");
 
 const upload = multer({ dest: './uploads' });
@@ -37,5 +38,7 @@ userRouter.put("/uploadProfileImage/:userId", upload.any(), updateProfileImage);
 // userRouter.put("/:id", userExists, updateUser);
 
 // userRouter.delete("/delete", deleteUser);
+
+userRouter.post("/playlist/addtrack", addToPlaylist);
 
 module.exports = userRouter;

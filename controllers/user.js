@@ -414,6 +414,6 @@ module.exports = {
   getFollowedUsers,
   updateUsername,
   getArtistById,
-  updateProfileImage
+  updateProfileImage,
   addToPlaylist,
 };

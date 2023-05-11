@@ -305,10 +305,10 @@ const getArtistById = async (req, res) => {
 
   try {
     const artist = await User.findOne({
-        _id: id,
-      })
-      .populate("tracks")
-      .populate("albums");
+      _id: id,
+    })
+      .populate("uploadedTracks")
+      .populate("uploadedAlbums");
 
     if (!artist) {
       return res.status(200).json({

@@ -4,7 +4,9 @@ const User = require("../models/User");
 const mongoose = require("mongoose");
 // const generateJWT = require("generateJWT");
 const nodemailer = require("nodemailer");
-const { uploadImage } = require("../utils/cloudinary");
+const {
+  uploadImage, deleteImage
+} = require("../utils/cloudinary");
 const fs = require('fs-extra');
 require("dotenv").config();
 
@@ -305,8 +307,8 @@ const getArtistById = async (req, res) => {
 
   try {
     const artist = await User.findOne({
-      _id: id,
-    })
+        _id: id,
+      })
       .populate("uploadedTracks")
       .populate("uploadedAlbums");
 
@@ -351,20 +353,27 @@ const updateProfileImage = async (req, res) => {
       const url = resultImage.secure_url
       const cloudinaryId = resultImage.public_id
 
-      console.log(userId)
-      console.log(url)
-      console.log(cloudinaryId)
-
-      await User.updateOne({
+      const userBeforeUpdate = await User.findOneAndUpdate({
         _id: userId
       }, {
         $set: {
           profilePhoto: url,
           profilePhotoCloudinaryId: cloudinaryId
-        }
+        },
+      }, {
+        new: false
       })
 
+      const response = await deleteImage(userBeforeUpdate.profilePhotoCloudinaryId)
+      if(!response.result==="ok"){
+        return res.status(503).json({
+          ok: false,
+          msg: response?.result
+        });
+      }
+
       await fs.unlink(file.path)
+
       return res.status(201).json({
         ok: true,
         profilePhoto: url,
@@ -380,23 +389,38 @@ const updateProfileImage = async (req, res) => {
 };
 
 const addToPlaylist = async (req, res) => {
-  const { playlistId, trackId } = req.body;
+  const {
+    playlistId,
+    trackId
+  } = req.body;
   try {
-    const playlist = await Playlist.findOne({ _id: playlistId, tracks: trackId });
+    const playlist = await Playlist.findOne({
+      _id: playlistId,
+      tracks: trackId
+    });
 
     if (playlist) {
       return res
         .status(503)
-        .json({ ok: false, msg: "Track is already in the list" });
+        .json({
+          ok: false,
+          msg: "Track is already in the list"
+        });
     }
 
     await Playlist.findByIdAndUpdate(
-      playlistId,
-      { $addToSet: { tracks: trackId } },
-      { new: true }
+      playlistId, {
+        $addToSet: {
+          tracks: trackId
+        }
+      }, {
+        new: true
+      }
     );
 
-    return res.status(201).json({ ok: true });
+    return res.status(201).json({
+      ok: true
+    });
   } catch (error) {
     console.log(error);
     return res.status(503).json({

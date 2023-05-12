@@ -68,7 +68,7 @@ const UserSchema = new mongoose.Schema({
   profilePhotoCloudinaryId: {
     type: String,
     required: true,
-    default: "",
+    default: "empty",
   },
   uploadedTracks: {
     type: [mongoose.Schema.Types.ObjectId],

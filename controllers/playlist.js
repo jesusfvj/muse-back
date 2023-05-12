@@ -354,6 +354,12 @@ const duplicatePlaylist = async (req, res) => {
         msg: "This playlist is private!! How did you get there?",
       });
     }
+    if (playlistToDuplicate.tracks.length===0) {
+      return res.status(401).json({
+        ok: false,
+        msg: "This playlist does not have any song to duplicate",
+      });
+    }
     const userPlaylists = loggedUser.playlists;
     const foundPlaylist = userPlaylists.some((playlist) =>
       playlist.copyFrom.toString().includes(playlistId)

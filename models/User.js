@@ -72,7 +72,7 @@ const UserSchema = new mongoose.Schema({
   },
   uploadedTracks: {
     type: [mongoose.Schema.Types.ObjectId],
-    ref: "Track",
+    ref: "UploadedTrack",
     required: true,
     default: [],
   },

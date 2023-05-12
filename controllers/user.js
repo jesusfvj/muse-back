@@ -1,7 +1,7 @@
 const bcrypt = require("bcryptjs");
 const Playlist = require("../models/Playlist");
 const User = require("../models/User");
-const Album = require('../models/Album')
+const Album = require("../models/Album");
 const mongoose = require("mongoose");
 // const generateJWT = require("generateJWT");
 const nodemailer = require("nodemailer");
@@ -183,13 +183,14 @@ const getUserById = async (req, res) => {
       .populate("playlists")
       .populate("followedPlaylists")
       .populate("tracks")
-      .populate("albums");
+      .populate("albums")
+      .populate("following");
+
     if (!user) {
       return res.status(200).json({
         ok: false,
       });
     }
-
     user.password = undefined;
 
     return res.status(200).json({
@@ -408,7 +409,7 @@ const addToPlaylist = async (req, res) => {
   }
 };
 
-const toggleFollowAlbum =async(req, res) => {
+const toggleFollowAlbum = async (req, res) => {
   const { albumId, userId, isFollowed } = req.body;
 
   try {
@@ -454,8 +455,6 @@ const toggleFollowAlbum =async(req, res) => {
       msg: "Oops, something happened",
     });
   }
-
-
 };
 
 module.exports = {

@@ -1,13 +1,12 @@
 const bcrypt = require("bcryptjs");
 const Playlist = require("../models/Playlist");
 const User = require("../models/User");
+const Album = require('../models/Album')
 const mongoose = require("mongoose");
 // const generateJWT = require("generateJWT");
 const nodemailer = require("nodemailer");
-const {
-  uploadImage, deleteImage
-} = require("../utils/cloudinary");
-const fs = require('fs-extra');
+const { uploadImage, deleteImage } = require("../utils/cloudinary");
+const fs = require("fs-extra");
 require("dotenv").config();
 
 const transporter = nodemailer.createTransport({
@@ -19,13 +18,7 @@ const transporter = nodemailer.createTransport({
 });
 
 const register = async (req, res) => {
-  const {
-    fullName,
-    email,
-    password,
-    repPassword,
-    isArtist
-  } = req.body;
+  const { fullName, email, password, repPassword, isArtist } = req.body;
 
   const mailOptions = {
     from: "muse.team.assembler@gmail.com",
@@ -44,7 +37,7 @@ const register = async (req, res) => {
     });
 
     const user = await User.findOne({
-      email
+      email,
     });
 
     if (user) {
@@ -88,13 +81,10 @@ const register = async (req, res) => {
 };
 
 const logInUser = async (req, res) => {
-  const {
-    email,
-    password
-  } = req.body;
+  const { email, password } = req.body;
   try {
     const userFromDb = await User.findOne({
-      email
+      email,
     }).populate("playlists");
 
     if (!userFromDb) {
@@ -128,30 +118,26 @@ const logInUser = async (req, res) => {
 };
 
 const followUser = async (req, res) => {
-  const {
-    loggedUserId,
-    followedUserId,
-    isFollowing
-  } = req.body;
+  const { loggedUserId, followedUserId, isFollowing } = req.body;
 
   try {
     const loggedUser = await User.findOne({
-      _id: loggedUserId
+      _id: loggedUserId,
     });
     const followedUser = await User.findOne({
-      _id: followedUserId
+      _id: followedUserId,
     });
 
     if (isFollowing) {
       await loggedUser.updateOne({
         $push: {
-          following: followedUserId
-        }
+          following: followedUserId,
+        },
       });
       await followedUser.updateOne({
         $push: {
-          followedBy: loggedUserId
-        }
+          followedBy: loggedUserId,
+        },
       });
       return res.status(200).json({
         ok: true,
@@ -160,13 +146,13 @@ const followUser = async (req, res) => {
     } else {
       await loggedUser.updateOne({
         $pull: {
-          following: followedUserId
-        }
+          following: followedUserId,
+        },
       });
       await followedUser.updateOne({
         $pull: {
-          followedBy: loggedUserId
-        }
+          followedBy: loggedUserId,
+        },
       });
       return res.status(200).json({
         ok: true,
@@ -182,9 +168,7 @@ const followUser = async (req, res) => {
 };
 
 const getUserById = async (req, res) => {
-  const {
-    id
-  } = req.params;
+  const { id } = req.params;
 
   if (id.length !== 24) {
     return res.status(200).json({
@@ -194,8 +178,8 @@ const getUserById = async (req, res) => {
 
   try {
     const user = await User.findOne({
-        _id: id
-      })
+      _id: id,
+    })
       .populate("playlists")
       .populate("followedPlaylists")
       .populate("tracks")
@@ -222,15 +206,13 @@ const getUserById = async (req, res) => {
 };
 
 const getArtists = async (req, res) => {
-  const {
-    id
-  } = req.params;
+  const { id } = req.params;
   const objectId = new mongoose.Types.ObjectId(id);
 
   try {
     const artists = await User.find({
       _id: {
-        $ne: objectId
+        $ne: objectId,
       },
       role: "artist",
     });
@@ -247,9 +229,7 @@ const getArtists = async (req, res) => {
   }
 };
 const getFollowedUsers = async (req, res) => {
-  const {
-    id
-  } = req.params;
+  const { id } = req.params;
   const objectId = new mongoose.Types.ObjectId(id);
 
   try {
@@ -270,20 +250,18 @@ const getFollowedUsers = async (req, res) => {
 };
 
 const updateUsername = async (req, res) => {
-  const {
-    username,
-    userId
-  } = req.body;
+  const { username, userId } = req.body;
 
   try {
-    const newUser = await User.findOneAndUpdate({
-        _id: userId
+    const newUser = await User.findOneAndUpdate(
+      {
+        _id: userId,
       }, // filter
       {
-        fullName: username
+        fullName: username,
       }, // update
       {
-        new: true
+        new: true,
       } // options
     );
     console.log(newUser);
@@ -301,14 +279,12 @@ const updateUsername = async (req, res) => {
 
 const getArtistById = async (req, res) => {
   console.log(req.params);
-  const {
-    id
-  } = req.params;
+  const { id } = req.params;
 
   try {
     const artist = await User.findOne({
-        _id: id,
-      })
+      _id: id,
+    })
       .populate("uploadedTracks")
       .populate("uploadedAlbums");
 
@@ -337,8 +313,8 @@ const getArtistById = async (req, res) => {
 };
 
 const updateProfileImage = async (req, res) => {
-  const userId = req.params.userId
-  const file = req.files[0]
+  const userId = req.params.userId;
+  const file = req.files[0];
 
   try {
     if (!file) {
@@ -349,30 +325,36 @@ const updateProfileImage = async (req, res) => {
     }
     if (file) {
       //Upload thumbnail to Cloudinary
-      const resultImage = await uploadImage(file.path)
-      const url = resultImage.secure_url
-      const cloudinaryId = resultImage.public_id
+      const resultImage = await uploadImage(file.path);
+      const url = resultImage.secure_url;
+      const cloudinaryId = resultImage.public_id;
 
-      const userBeforeUpdate = await User.findOneAndUpdate({
-        _id: userId
-      }, {
-        $set: {
-          profilePhoto: url,
-          profilePhotoCloudinaryId: cloudinaryId
+      const userBeforeUpdate = await User.findOneAndUpdate(
+        {
+          _id: userId,
         },
-      }, {
-        new: false
-      })
+        {
+          $set: {
+            profilePhoto: url,
+            profilePhotoCloudinaryId: cloudinaryId,
+          },
+        },
+        {
+          new: false,
+        }
+      );
 
-      const response = await deleteImage(userBeforeUpdate.profilePhotoCloudinaryId)
-      if(!response.result==="ok"){
+      const response = await deleteImage(
+        userBeforeUpdate.profilePhotoCloudinaryId
+      );
+      if (!response.result === "ok") {
         return res.status(503).json({
           ok: false,
-          msg: response?.result
+          msg: response?.result,
         });
       }
 
-      await fs.unlink(file.path)
+      await fs.unlink(file.path);
 
       return res.status(201).json({
         ok: true,
@@ -389,37 +371,34 @@ const updateProfileImage = async (req, res) => {
 };
 
 const addToPlaylist = async (req, res) => {
-  const {
-    playlistId,
-    trackId
-  } = req.body;
+  const { playlistId, trackId } = req.body;
   try {
     const playlist = await Playlist.findOne({
       _id: playlistId,
-      tracks: trackId
+      tracks: trackId,
     });
 
     if (playlist) {
-      return res
-        .status(503)
-        .json({
-          ok: false,
-          msg: "Track is already in the list"
-        });
+      return res.status(503).json({
+        ok: false,
+        msg: "Track is already in the list",
+      });
     }
 
     await Playlist.findByIdAndUpdate(
-      playlistId, {
+      playlistId,
+      {
         $addToSet: {
-          tracks: trackId
-        }
-      }, {
-        new: true
+          tracks: trackId,
+        },
+      },
+      {
+        new: true,
       }
     );
 
     return res.status(201).json({
-      ok: true
+      ok: true,
     });
   } catch (error) {
     console.log(error);
@@ -427,6 +406,56 @@ const addToPlaylist = async (req, res) => {
       ok: false,
     });
   }
+};
+
+const toggleFollowAlbum =async(req, res) => {
+  const { albumId, userId, isFollowed } = req.body;
+
+  try {
+    const loggedUser = await User.findOne({
+      _id: userId,
+    });
+    const album = await Album.findOne({
+      _id: albumId,
+    });
+
+    if (isFollowed) {
+      await loggedUser.updateOne({
+        $push: {
+          albums: albumId,
+        },
+      });
+      await album.updateOne({
+        $push: {
+          followedBy: userId,
+        },
+      });
+      return res.status(200).json({
+        ok: true,
+      });
+    } else {
+      await loggedUser.updateOne({
+        $pull: {
+          albums: albumId,
+        },
+      });
+      await album.updateOne({
+        $pull: {
+          followedBy: userId,
+        },
+      });
+      return res.status(200).json({
+        ok: true,
+      });
+    }
+  } catch (error) {
+    return res.status(503).json({
+      ok: false,
+      msg: "Oops, something happened",
+    });
+  }
+
+
 };
 
 module.exports = {
@@ -440,4 +469,5 @@ module.exports = {
   getArtistById,
   updateProfileImage,
   addToPlaylist,
+  toggleFollowAlbum,
 };

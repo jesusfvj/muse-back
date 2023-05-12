@@ -216,7 +216,9 @@ const getArtists = async (req, res) => {
         $ne: objectId,
       },
       role: "artist",
-    });
+    })
+      .sort({ followedBy: -1 })
+      .limit(20);
 
     return res.status(200).json({
       ok: true,

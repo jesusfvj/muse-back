@@ -439,6 +439,7 @@ const updatePlaylist = async (req, res) => {
       const resultImage = await uploadImage(file.path)
       const url = resultImage.secure_url
       const cloudinaryId = resultImage.public_id
+      const color = resultImage.colors[0][0];
 
       const playlistBeforeUpdate = await Playlist.findOneAndUpdate({
         _id: playlistId
@@ -446,6 +447,7 @@ const updatePlaylist = async (req, res) => {
         $set: {
           name: name,
           thumbnail: url,
+          color: color,
           thumbnailCloudinaryId: cloudinaryId
         },
       }, {
@@ -466,6 +468,7 @@ const updatePlaylist = async (req, res) => {
         ok: true,
         newName: name,
         thumbnail: url,
+        color: color
       });
     }
   } catch (error) {

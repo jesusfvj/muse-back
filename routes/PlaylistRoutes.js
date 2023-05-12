@@ -5,13 +5,12 @@ const {
   followPlaylists,
   createPlaylist,
   deletePlaylist,
-  updatePlaylist,
   getPlaylists,
   getPlaylistById,
   isPrivate,
   addTracks,
   duplicatePlaylist,
-  updatePlaylistName
+  updatePlaylist,
 } = require("../controllers/playlist");
 
 const upload = multer({ dest: "./uploads" });
@@ -26,11 +25,10 @@ playlistRouter.post("/create/:userId", upload.any(), createPlaylist);
 // Delete = { loggedUserId, playlistId, action="delete" }
 playlistRouter.post("/delete", deletePlaylist);
 // Update = { loggedUserId, playlistId, newName:Optional, thumbnailUrl:Optional, action="update" }
-playlistRouter.put("/update", updatePlaylist);
 playlistRouter.put("/togglevisibility", isPrivate);
 playlistRouter.put("/addToPlaylist", addTracks);
 playlistRouter.post("/duplicatePlaylist", duplicatePlaylist);
-playlistRouter.put('/update/:playlistId', updatePlaylistName);
+playlistRouter.put('/update/:playlistId', upload.any(), updatePlaylist);
 
 
 // userRouter.delete("/delete", deleteUser);

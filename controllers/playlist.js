@@ -1,6 +1,6 @@
 const Playlist = require("../models/Playlist");
 const User = require("../models/User");
-const { uploadImage, deleteImage } = require("../utils/cloudinary");
+const { uploadImage, deleteCloudinaryFile } = require("../utils/cloudinary");
 const fs = require("fs-extra");
 
 const getPlaylists = async (req, res) => {
@@ -166,7 +166,9 @@ const deletePlaylist = async (req, res) => {
       },
     });
 
-    const response = await deleteImage(playlistToDelete.thumbnailCloudinaryId);
+    const response = await deleteCloudinaryFile(
+      playlistToDelete.thumbnailCloudinaryId
+    );
     if (!response.result === "ok") {
       return res.status(503).json({
         ok: false,
@@ -424,6 +426,7 @@ const updatePlaylist = async (req, res) => {
       const resultImage = await uploadImage(file.path);
       const url = resultImage.secure_url;
       const cloudinaryId = resultImage.public_id;
+      const color = resultImage.colors[0][0];
 
       const playlistBeforeUpdate = await Playlist.findOneAndUpdate(
         {
@@ -433,15 +436,15 @@ const updatePlaylist = async (req, res) => {
           $set: {
             name: name,
             thumbnail: url,
+            color: color,
             thumbnailCloudinaryId: cloudinaryId,
           },
-        },
-        {
+
           new: false,
         }
       );
 
-      const response = await deleteImage(
+      const response = await deleteCloudinaryFile(
         playlistBeforeUpdate.thumbnailCloudinaryId
       );
       if (!response.result === "ok") {
@@ -457,6 +460,7 @@ const updatePlaylist = async (req, res) => {
         ok: true,
         newName: name,
         thumbnail: url,
+        color: color,
       });
     }
   } catch (error) {

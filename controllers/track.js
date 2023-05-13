@@ -14,7 +14,10 @@ const Playlist = require("../models/Playlist");
 
 const getTracks = async (req, res) => {
   try {
-    const tracks = await Track.find({}).populate("artist");
+    const tracks = await Track.find({})
+      .populate("artist")
+      .sort({ followedBy: -1 })
+      .limit(20);
 
     return res.status(200).json({
       ok: true,
@@ -46,7 +49,7 @@ const addTracks = async (req, res) => {
           },
         },
       });
-      await track.updateOne({$push: {followedBy:loggedUserId}})
+      await track.updateOne({ $push: { followedBy: loggedUserId } });
       return res.status(200).json({
         ok: true,
         loggedUserId,
@@ -61,7 +64,7 @@ const addTracks = async (req, res) => {
           },
         },
       });
-      await track.updateOne({$pull: {followedBy:loggedUserId}})
+      await track.updateOne({ $pull: { followedBy: loggedUserId } });
       return res.status(200).json({
         ok: true,
         loggedUserId,

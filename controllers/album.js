@@ -4,7 +4,11 @@ const { deleteCloudinaryFile, uploadImage } = require("../utils/cloudinary");
 const fs = require("fs-extra");
 const getAlbums = async (req, res) => {
   try {
-    const albums = await Album.find({}).populate("artist").populate("songs");
+    const albums = await Album.find({})
+      .populate("artist")
+      .populate("songs")
+      .sort({ followedBy: -1 })
+      .limit(20);
 
     return res.status(200).json({ ok: true, albums });
   } catch (error) {

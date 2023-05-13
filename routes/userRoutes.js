@@ -14,6 +14,7 @@ const {
   addToPlaylist,
   toggleFollowAlbum,
   resetPassword,
+  resetPasswordChange,
 } = require("../controllers/user");
 
 const upload = multer({ dest: "./uploads" });
@@ -45,5 +46,6 @@ userRouter.post("/playlist/addtrack", addToPlaylist);
 
 userRouter.put("/toggleFollowPlaylist", toggleFollowAlbum);
 userRouter.post("/resetpassword", resetPassword);
+userRouter.post("/resetpasswordchange", resetPasswordChange);
 
 module.exports = userRouter;

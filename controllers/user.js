@@ -483,6 +483,26 @@ const resetPassword = async (req, res) => {
   user.save();
 }
 
+const resetPasswordChange = async (req, res) => {
+  const {token, newPassword, repeatNewPassword}= req.body
+  const user = await User.findOne({ resetToken: token });
+  console.log(user)
+
+  if (!user) {
+    return res.status(400).json({ ok: false, message: 'Invalid token' });
+  }
+
+  if (newPassword !== repeatNewPassword) {
+    return res.status(400).json({ ok: false, message: 'Password do not match' })
+  };
+  const salt = bcrypt.genSaltSync(10);
+  const hashedPassword = bcrypt.hashSync(newPassword, salt);
+  user.password = hashedPassword;
+  user.token = "empty";
+  await user.save();
+  return res.status(200).json({ ok: true, message: 'Your Password has been changed' })
+}
+
 module.exports = {
   register,
   logInUser,
@@ -496,4 +516,5 @@ module.exports = {
   addToPlaylist,
   toggleFollowAlbum,
   resetPassword,
+  resetPasswordChange,
 };

@@ -3,7 +3,7 @@ const Album = require("../models/Album");
 const User = require("../models/User");
 const fs = require("fs-extra");
 
-const { uploadImage, uploadSong, deleteImage } = require("../utils/cloudinary");
+const { uploadImage, uploadSong, deleteCloudinaryFile } = require("../utils/cloudinary");
 const {
   grouperDataFunction,
   deleteFilesFromUploadFolder,
@@ -252,9 +252,132 @@ const getTrackById = async (req, res) => {
   }
 };
 
+const updateTrack = async (req, res) => {
+  const {
+    name
+  } = JSON.parse(req.body.imagePlaylistData);
+  const trackId = req.params.trackId
+  const file = req.files[0]
+
+  try {
+    if (!file) {
+      return res.status(503).json({
+        ok: false,
+        msg: "No files uploaded",
+      });
+    }
+    if (file) {
+      //Upload thumbnail to Cloudinary
+      const resultImage = await uploadImage(file.path)
+      const url = resultImage.secure_url
+      const cloudinaryId = resultImage.public_id
+
+      const trackBeforeUpdate = await Track.findOneAndUpdate({
+        _id: trackId
+      }, {
+        $set: {
+          name: name,
+          thumbnailUrl: url,
+          thumbnailCloudinaryId: cloudinaryId
+        },
+      }, {
+        new: false
+      })
+
+      const response = await deleteCloudinaryFile(trackBeforeUpdate.thumbnailCloudinaryId)
+      if (!response.result === "ok") {
+        return res.status(503).json({
+          ok: false,
+          msg: response.result
+        });
+      }
+
+      await fs.unlink(file.path)
+
+      return res.status(201).json({
+        ok: true,
+        newName: name,
+        thumbnail: url
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(503).json({
+      ok: false,
+      msg: "Oops, something happened",
+    });
+  }
+};
+
+const deleteTrack = async (req, res) => {
+  const {
+    loggedUserId,
+    trackId
+  } = req.body;
+
+  try {
+    const loggedUser = await User.findOne({
+      _id: loggedUserId,
+    });
+    const trackToDelete = await Track.findOne({
+      _id: trackId,
+    });
+
+    if (trackToDelete.artist.toString() !== loggedUserId) {
+      return res.status(401).json({
+        ok: false,
+        message: "You are not the owner of this track",
+      });
+    }
+    await loggedUser.updateOne({
+      $pull: {
+        tracks: trackId,
+      },
+    });
+
+    const responseImage = await deleteCloudinaryFile(trackToDelete.thumbnailCloudinaryId)
+    if (!responseImage.result === "ok") {
+      return res.status(503).json({
+        ok: false,
+        msg: responseImage.result
+      });
+    }
+
+    const responseSong = await deleteCloudinaryFile(trackToDelete.trackCloudinaryId)
+    if (!responseSong.result === "ok") {
+      return res.status(503).json({
+        ok: false,
+        msg: responseSong.result
+      });
+    }
+
+    await Track.findByIdAndDelete(trackId).then((deletedTrack) => {
+      return res.status(200).json({
+        ok: true,
+        deletedTrack,
+      });
+    });
+    await Playlist.updateMany({
+      tracks: trackId,
+    }, {
+      $pull: {
+        tracks: trackId,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(503).json({
+      ok: false,
+      msg: "Oops, something happened",
+    });
+  }
+};
+
 module.exports = {
   addTracks,
   uploadNewSongs,
   getTracks,
   getTrackById,
+  updateTrack,
+  deleteTrack
 };

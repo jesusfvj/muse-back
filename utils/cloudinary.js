@@ -25,12 +25,12 @@ const uploadSong = async (filePath) => {
     })
 }
 
-const deleteImage = async (thumbnailCloudinaryId) => {
-    return await cloudinary.uploader.destroy(thumbnailCloudinaryId)
+const deleteCloudinaryFile = async (cloudinaryId) => {
+    return await cloudinary.uploader.destroy(cloudinaryId)
 }
 
 module.exports = {
     uploadImage,
     uploadSong,
-    deleteImage
+    deleteCloudinaryFile
 }

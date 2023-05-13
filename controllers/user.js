@@ -5,7 +5,7 @@ const Album = require("../models/Album");
 const mongoose = require("mongoose");
 // const generateJWT = require("generateJWT");
 const nodemailer = require("nodemailer");
-const { uploadImage, deleteImage } = require("../utils/cloudinary");
+const { uploadImage, deleteCloudinaryFile } = require("../utils/cloudinary");
 const fs = require("fs-extra");
 require("dotenv").config();
 
@@ -345,7 +345,7 @@ const updateProfileImage = async (req, res) => {
         }
       );
 
-      const response = await deleteImage(
+      const response = await deleteCloudinaryFile(
         userBeforeUpdate.profilePhotoCloudinaryId
       );
       if (!response.result === "ok") {

@@ -2,7 +2,7 @@ const Playlist = require("../models/Playlist");
 const User = require("../models/User");
 const {
   uploadImage,
-  deleteImage
+  deleteCloudinaryFile
 } = require("../utils/cloudinary");
 const fs = require("fs-extra");
 
@@ -171,7 +171,7 @@ const deletePlaylist = async (req, res) => {
       },
     });
 
-    const response = await deleteImage(playlistToDelete.thumbnailCloudinaryId)
+    const response = await deleteCloudinaryFile(playlistToDelete.thumbnailCloudinaryId)
     if (!response.result === "ok") {
       return res.status(503).json({
         ok: false,
@@ -454,7 +454,7 @@ const updatePlaylist = async (req, res) => {
         new: false
       })
 
-      const response = await deleteImage(playlistBeforeUpdate.thumbnailCloudinaryId)
+      const response = await deleteCloudinaryFile(playlistBeforeUpdate.thumbnailCloudinaryId)
       if (!response.result === "ok") {
         return res.status(503).json({
           ok: false,
@@ -480,7 +480,6 @@ const updatePlaylist = async (req, res) => {
   }
 };
 
-
 module.exports = {
   getPlaylists,
   getPlaylistById,
@@ -492,3 +491,5 @@ module.exports = {
   duplicatePlaylist,
   addTracks,
 };
+
+/* Max peso que permite cloudinary 10485760 */

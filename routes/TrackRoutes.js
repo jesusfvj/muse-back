@@ -5,6 +5,8 @@ const {
   uploadNewSongs,
   getTracks,
   getTrackById,
+  updateTrack,
+  deleteTrack
 } = require("../controllers/track");
 const multer = require("multer");
 
@@ -21,5 +23,7 @@ trackRouter.post("/addToLibrary", addTracks);
 trackRouter.post("/uploadNewSongs/:userId", upload.any(), uploadNewSongs);
 trackRouter.get("/", getTracks);
 trackRouter.get("/id/:id", getTrackById);
+trackRouter.put('/update/:trackId', upload.any(), updateTrack);
+trackRouter.post("/delete", deleteTrack);
 
 module.exports = trackRouter;

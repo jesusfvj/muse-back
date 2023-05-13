@@ -3,7 +3,11 @@ const Album = require("../models/Album");
 const User = require("../models/User");
 const fs = require("fs-extra");
 
-const { uploadImage, uploadSong, deleteCloudinaryFile } = require("../utils/cloudinary");
+const {
+  uploadImage,
+  uploadSong,
+  deleteCloudinaryFile,
+} = require("../utils/cloudinary");
 const {
   grouperDataFunction,
   deleteFilesFromUploadFolder,
@@ -216,7 +220,6 @@ const uploadNewSongs = async (req, res) => {
       ok: true,
     });
   } catch (error) {
-    console.log(error);
     return res.status(503).json({
       ok: false,
       msg: "Something happened...",
@@ -226,22 +229,24 @@ const uploadNewSongs = async (req, res) => {
 
 const getTrackById = async (req, res) => {
   const { id } = req.params;
-
+  console.log(id);
+  //get by id params
   try {
-    const DBtrack = await Track.findOne({ _id: id }).populate("artist");
+    let DBtrack = await Track.findOne({ _id: "645c9b4add34a1b607e2eb11" }).populate('artist');
+
     const featuredIn = await Playlist.find({
       tracks: { $in: id },
       isPrivate: false,
     });
 
-    const track = { DBtrack, featuredIn };
-
-    if (!track) {
+    if (!DBtrack) {
       return res.status(503).json({
         ok: false,
         msg: "Could not find the track",
       });
     }
+    const track = { DBtrack, featuredIn };
+
     return res.status(200).json({
       ok: true,
       track,
@@ -256,11 +261,9 @@ const getTrackById = async (req, res) => {
 };
 
 const updateTrack = async (req, res) => {
-  const {
-    name
-  } = JSON.parse(req.body.imagePlaylistData);
-  const trackId = req.params.trackId
-  const file = req.files[0]
+  const { name } = JSON.parse(req.body.imagePlaylistData);
+  const trackId = req.params.trackId;
+  const file = req.files[0];
 
   try {
     if (!file) {
@@ -271,36 +274,42 @@ const updateTrack = async (req, res) => {
     }
     if (file) {
       //Upload thumbnail to Cloudinary
-      const resultImage = await uploadImage(file.path)
-      const url = resultImage.secure_url
-      const cloudinaryId = resultImage.public_id
+      const resultImage = await uploadImage(file.path);
+      const url = resultImage.secure_url;
+      const cloudinaryId = resultImage.public_id;
 
-      const trackBeforeUpdate = await Track.findOneAndUpdate({
-        _id: trackId
-      }, {
-        $set: {
-          name: name,
-          thumbnailUrl: url,
-          thumbnailCloudinaryId: cloudinaryId
+      const trackBeforeUpdate = await Track.findOneAndUpdate(
+        {
+          _id: trackId,
         },
-      }, {
-        new: false
-      })
+        {
+          $set: {
+            name: name,
+            thumbnailUrl: url,
+            thumbnailCloudinaryId: cloudinaryId,
+          },
+        },
+        {
+          new: false,
+        }
+      );
 
-      const response = await deleteCloudinaryFile(trackBeforeUpdate.thumbnailCloudinaryId)
+      const response = await deleteCloudinaryFile(
+        trackBeforeUpdate.thumbnailCloudinaryId
+      );
       if (!response.result === "ok") {
         return res.status(503).json({
           ok: false,
-          msg: response.result
+          msg: response.result,
         });
       }
 
-      await fs.unlink(file.path)
+      await fs.unlink(file.path);
 
       return res.status(201).json({
         ok: true,
         newName: name,
-        thumbnail: url
+        thumbnail: url,
       });
     }
   } catch (error) {
@@ -313,10 +322,7 @@ const updateTrack = async (req, res) => {
 };
 
 const deleteTrack = async (req, res) => {
-  const {
-    loggedUserId,
-    trackId
-  } = req.body;
+  const { loggedUserId, trackId } = req.body;
 
   try {
     const loggedUser = await User.findOne({
@@ -338,19 +344,23 @@ const deleteTrack = async (req, res) => {
       },
     });
 
-    const responseImage = await deleteCloudinaryFile(trackToDelete.thumbnailCloudinaryId)
+    const responseImage = await deleteCloudinaryFile(
+      trackToDelete.thumbnailCloudinaryId
+    );
     if (!responseImage.result === "ok") {
       return res.status(503).json({
         ok: false,
-        msg: responseImage.result
+        msg: responseImage.result,
       });
     }
 
-    const responseSong = await deleteCloudinaryFile(trackToDelete.trackCloudinaryId)
+    const responseSong = await deleteCloudinaryFile(
+      trackToDelete.trackCloudinaryId
+    );
     if (!responseSong.result === "ok") {
       return res.status(503).json({
         ok: false,
-        msg: responseSong.result
+        msg: responseSong.result,
       });
     }
 
@@ -360,13 +370,16 @@ const deleteTrack = async (req, res) => {
         deletedTrack,
       });
     });
-    await Playlist.updateMany({
-      tracks: trackId,
-    }, {
-      $pull: {
+    await Playlist.updateMany(
+      {
         tracks: trackId,
       },
-    });
+      {
+        $pull: {
+          tracks: trackId,
+        },
+      }
+    );
   } catch (error) {
     console.log(error);
     return res.status(503).json({
@@ -382,5 +395,5 @@ module.exports = {
   getTracks,
   getTrackById,
   updateTrack,
-  deleteTrack
+  deleteTrack,
 };

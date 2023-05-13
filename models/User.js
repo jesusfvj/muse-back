@@ -81,7 +81,12 @@ const UserSchema = new mongoose.Schema({
     ref: "Album",
     required: true,
     default: [],
-  }
+  },
+  resetToken: {
+    type: String,
+    required: true,
+    default: "empty",
+  },
 });
 const User = mongoose.model("User", UserSchema);
 module.exports = User;

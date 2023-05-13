@@ -8,6 +8,7 @@ const nodemailer = require("nodemailer");
 const { uploadImage, deleteImage } = require("../utils/cloudinary");
 const fs = require("fs-extra");
 require("dotenv").config();
+const { uuid } = require('uuidv4');
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -459,6 +460,29 @@ const toggleFollowAlbum = async (req, res) => {
   }
 };
 
+const resetPassword = async (req, res) => {
+  const { email } = req.body;
+  const token = uuid();
+  const mailOptions = {
+    from: "muse.team.assembler@gmail.com",
+    to: email,
+    subject: "Muze team",
+    text: `Hi, paste this to the broswer to reset the password: 127.0.0.1:5173/resetpassword/${token}`,
+  };
+  transporter.sendMail(mailOptions, function (error, info) {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log("Email sent: " + info.response);
+    }
+  });
+  const user = await User.findOne({
+    email: email
+  })
+  user.resetToken = token;
+  user.save();
+}
+
 module.exports = {
   register,
   logInUser,
@@ -471,4 +495,5 @@ module.exports = {
   updateProfileImage,
   addToPlaylist,
   toggleFollowAlbum,
+  resetPassword,
 };

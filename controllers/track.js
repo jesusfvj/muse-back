@@ -229,10 +229,9 @@ const uploadNewSongs = async (req, res) => {
 
 const getTrackById = async (req, res) => {
   const { id } = req.params;
-  console.log(id);
-  //get by id params
+
   try {
-    let DBtrack = await Track.findOne({ _id: "645c9b4add34a1b607e2eb11" }).populate('artist');
+    let DBtrack = await Track.findOne({ _id: id }).populate('artist');
 
     const featuredIn = await Playlist.find({
       tracks: { $in: id },

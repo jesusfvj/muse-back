@@ -489,6 +489,10 @@ Muze Team
   const user = await User.findOne({
     email: email,
   });
+
+  if(!user){
+        return res.status(400).json({ ok: false, message: "Not a valid user" });
+  }
   user.resetToken = token;
   user.save();
 };
@@ -496,7 +500,6 @@ Muze Team
 const resetPasswordChange = async (req, res) => {
   const { token, newPassword, repeatNewPassword } = req.body;
   const user = await User.findOne({ resetToken: token });
-  console.log(user);
 
   if (!user) {
     return res.status(400).json({ ok: false, message: "Invalid token" });

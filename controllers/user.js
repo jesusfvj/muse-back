@@ -193,7 +193,15 @@ const getUserById = async (req, res) => {
       })
       .populate("albums")
       .populate("following")
-      .populate({ path: "playerQueue", populate: "tracks" });
+      .populate({
+        path: "playerQueue",
+        populate: {
+          path: "tracks",
+          populate: {
+            path: "artist",
+          },
+        },
+      });
 
     if (!user) {
       return res.status(200).json({

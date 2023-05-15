@@ -3,7 +3,7 @@ const User = require("../models/User");
 
 const getQueue = async (req, res) => {
   const { loggedUserId } = req.body;
-  console.log(loggedUserId);
+
   try {
     const loggedUserQueue = await PlayQueue.findOne({
       userId: loggedUserId,
@@ -104,7 +104,7 @@ const createQueue = async (req, res) => {
         { userId: userId },
         { $set: { tracks: [...trackId] }, index: 0 },
         { new: true }
-      ).populate("tracks");
+      ).populate({ path: "tracks", populate: "artist" });
       return res.status(200).json({
         ok: true,
         playQueue: updatedQueue,
@@ -124,7 +124,7 @@ const createQueue = async (req, res) => {
       console.log(user);
       await user.save();
 
-      await newQueue.populate("tracks");
+      await newQueue.populate({ path: "tracks", populate: "artist" });
 
       return res.status(200).json({
         ok: true,

@@ -82,6 +82,12 @@ const UserSchema = new mongoose.Schema({
     required: true,
     default: [],
   },
+  playerQueue: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: "Play Queue",
+    required: true,
+    default: [],
+  },
   resetToken: {
     type: String,
     required: true,

@@ -7,6 +7,7 @@ const trackRouter = require("./routes/TrackRoutes");
 const searchRouter = require("./routes/SearchRoutes");
 const queueRouter = require("./routes/PlayQueue");
 const albumRouter = require("./routes/AlbumRoutes");
+const adminRouter = require("./routes/AdminRoutes");
 
 const app = express();
 
@@ -21,5 +22,6 @@ app.use("/track", trackRouter);
 app.use("/search", searchRouter);
 app.use("/queue", queueRouter);
 app.use("/album", albumRouter);
+app.use("/admin", adminRouter);
 
 module.exports = app;

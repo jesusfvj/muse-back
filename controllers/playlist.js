@@ -9,9 +9,11 @@ const fs = require("fs-extra");
 const getPlaylists = async (req, res) => {
   try {
     const playlists = await Playlist.find({
-      isPrivate: false,
-    })
-      .sort({ followedBy: -1 })
+        isPrivate: false,
+      })
+      .sort({
+        followedBy: -1
+      })
       .limit(20);
 
     return res.status(200).json({
@@ -28,7 +30,11 @@ const getPlaylists = async (req, res) => {
 };
 
 const followPlaylists = async (req, res) => {
-  const { loggedUserId, playlistId, isAdded } = req.body;
+  const {
+    loggedUserId,
+    playlistId,
+    isAdded
+  } = req.body;
 
   try {
     const loggedUser = await User.findOne({
@@ -43,18 +49,15 @@ const followPlaylists = async (req, res) => {
         },
       });
 
-      await Playlist.findOneAndUpdate(
-        {
-          _id: playlistId,
-        },
-        {
-          $addToSet: {
-            followedBy: {
-              $each: [loggedUserId],
-            },
+      await Playlist.findOneAndUpdate({
+        _id: playlistId,
+      }, {
+        $addToSet: {
+          followedBy: {
+            $each: [loggedUserId],
           },
-        }
-      );
+        },
+      });
 
       return res.status(200).json({
         ok: true,
@@ -71,18 +74,15 @@ const followPlaylists = async (req, res) => {
         },
       });
 
-      await Playlist.findOneAndUpdate(
-        {
-          _id: playlistId,
-        },
-        {
-          $pull: {
-            followedBy: {
-              $in: loggedUserId,
-            },
+      await Playlist.findOneAndUpdate({
+        _id: playlistId,
+      }, {
+        $pull: {
+          followedBy: {
+            $in: loggedUserId,
           },
-        }
-      );
+        },
+      });
       return res.status(200).json({
         ok: true,
         loggedUserId,
@@ -100,7 +100,10 @@ const followPlaylists = async (req, res) => {
 };
 
 const createPlaylist = async (req, res) => {
-  const { name, isPrivate } = JSON.parse(req.body.imagePlaylistData);
+  const {
+    name,
+    isPrivate
+  } = JSON.parse(req.body.imagePlaylistData);
 
   const userId = req.params.userId;
   const file = req.files[0];
@@ -148,7 +151,10 @@ const createPlaylist = async (req, res) => {
 };
 
 const deletePlaylist = async (req, res) => {
-  const { loggedUserId, playlistId } = req.body;
+  const {
+    loggedUserId,
+    playlistId
+  } = req.body;
 
   try {
     const loggedUser = await User.findOne({
@@ -183,16 +189,13 @@ const deletePlaylist = async (req, res) => {
         deletedPlaylist,
       });
     });
-    await User.updateMany(
-      {
+    await User.updateMany({
+      followedPlaylists: playlistId,
+    }, {
+      $pull: {
         followedPlaylists: playlistId,
       },
-      {
-        $pull: {
-          followedPlaylists: playlistId,
-        },
-      }
-    );
+    });
   } catch (error) {
     console.log(error);
     return res.status(503).json({
@@ -203,7 +206,9 @@ const deletePlaylist = async (req, res) => {
 };
 
 const getPlaylistById = async (req, res) => {
-  const { id } = req.params;
+  const {
+    id
+  } = req.params;
 
   if (id.length !== 24) {
     return res.status(200).json({
@@ -242,7 +247,11 @@ const getPlaylistById = async (req, res) => {
 };
 
 const isPrivate = async (req, res) => {
-  const { loggedUserId, playlistId, isPrivate } = req.body;
+  const {
+    loggedUserId,
+    playlistId,
+    isPrivate
+  } = req.body;
 
   try {
     const playlistToUpdate = await Playlist.findOne({
@@ -260,16 +269,13 @@ const isPrivate = async (req, res) => {
     });
 
     if (!isPrivate) {
-      await User.updateMany(
-        {
+      await User.updateMany({
+        followedPlaylists: playlistId,
+      }, {
+        $pull: {
           followedPlaylists: playlistId,
         },
-        {
-          $pull: {
-            followedPlaylists: playlistId,
-          },
-        }
-      );
+      });
     }
 
     return res.status(200).json({
@@ -284,7 +290,12 @@ const isPrivate = async (req, res) => {
   }
 };
 const addTracks = async (req, res) => {
-  const { loggedUserId, playlistId, trackId, isAdded } = req.body;
+  const {
+    loggedUserId,
+    playlistId,
+    trackId,
+    isAdded
+  } = req.body;
   try {
     const playlistToUpdate = await Playlist.findOne({
       _id: playlistId,
@@ -322,7 +333,10 @@ const addTracks = async (req, res) => {
 };
 
 const duplicatePlaylist = async (req, res) => {
-  const { loggedUserId, playlistId } = req.body;
+  const {
+    loggedUserId,
+    playlistId
+  } = req.body;
   try {
     const playlistToDuplicate = await Playlist.findOne({
       _id: playlistId,
@@ -411,7 +425,9 @@ const duplicatePlaylist = async (req, res) => {
 };
 
 const updatePlaylist = async (req, res) => {
-  const { name } = JSON.parse(req.body.imagePlaylistData);
+  const {
+    name
+  } = JSON.parse(req.body.imagePlaylistData);
   const playlistId = req.params.playlistId;
   const file = req.files[0];
 
@@ -438,10 +454,9 @@ const updatePlaylist = async (req, res) => {
           color: color,
           thumbnailCloudinaryId: cloudinaryId
         },
-        {
-          new: false,
-        }
-      );
+      }, {
+        new: false,
+      });
 
       const response = await deleteCloudinaryFile(playlistBeforeUpdate.thumbnailCloudinaryId)
       if (!response.result === "ok") {

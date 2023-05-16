@@ -450,21 +450,6 @@ const updatePlaylist = async (req, res) => {
       }, {
         new: false,
       });
-      const playlistBeforeUpdate = await Playlist.findOneAndUpdate(
-        {
-          _id: playlistId,
-        },
-        {
-          $set: {
-            name: name,
-            thumbnail: url,
-            color: color,
-            thumbnailCloudinaryId: cloudinaryId,
-          },
-
-          new: false,
-        }
-      );
 
       const response = await deleteCloudinaryFile(
         playlistBeforeUpdate.thumbnailCloudinaryId

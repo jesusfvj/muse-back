@@ -490,8 +490,8 @@ Muze Team
     email: email,
   });
 
-  if(!user){
-        return res.status(400).json({ ok: false, message: "Not a valid user" });
+  if (!user) {
+    return res.status(400).json({ ok: false, message: "Not a valid user" });
   }
   user.resetToken = token;
   user.save();
@@ -520,6 +520,42 @@ const resetPasswordChange = async (req, res) => {
     .json({ ok: true, message: "Your Password has been changed" });
 };
 
+const updatePasswordProfile = async (req, res) => {
+  const userId = req.body.userId;
+  const oldPassword = req.body.oldPassword;
+  const newPassword = req.body.newPassword;
+
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // const isMatch = await bcrypt.compare(oldPassword, user.password);
+
+    // if (!isMatch) {
+    //   return res.status(400).json({ message: 'La contraseña actual es incorrecta' });
+    // }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedNewPassword = await bcrypt.hash(newPassword, salt);
+
+    if (hashedNewPassword === user.password) {
+      return res.json({ message: 'The password is the same as before' });
+    }
+
+    user.password = hashedNewPassword;
+
+    await user.save();
+
+    return res.json({ message: 'password updated' });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
 module.exports = {
   register,
   logInUser,
@@ -534,4 +570,5 @@ module.exports = {
   toggleFollowAlbum,
   resetPassword,
   resetPasswordChange,
+  updatePasswordProfile,
 };

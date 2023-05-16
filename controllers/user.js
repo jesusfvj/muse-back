@@ -8,6 +8,7 @@ const nodemailer = require("nodemailer");
 const { uploadImage, deleteCloudinaryFile } = require("../utils/cloudinary");
 const fs = require("fs-extra");
 require("dotenv").config();
+const { uuid } = require("uuidv4");
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -85,7 +86,9 @@ const logInUser = async (req, res) => {
   try {
     const userFromDb = await User.findOne({
       email,
-    }).populate("playlists");
+    })
+      .populate("playlists")
+      .populate("playerQueue");
 
     if (!userFromDb) {
       return res.status(400).json({
@@ -182,9 +185,23 @@ const getUserById = async (req, res) => {
     })
       .populate("playlists")
       .populate("followedPlaylists")
-      .populate("tracks")
+      .populate({
+        path: "tracks",
+        populate: {
+          path: "artist",
+        },
+      })
       .populate("albums")
-      .populate("following");
+      .populate("following")
+      .populate({
+        path: "playerQueue",
+        populate: {
+          path: "tracks",
+          populate: {
+            path: "artist",
+          },
+        },
+      });
 
     if (!user) {
       return res.status(200).json({
@@ -459,6 +476,61 @@ const toggleFollowAlbum = async (req, res) => {
   }
 };
 
+const resetPassword = async (req, res) => {
+  const { email } = req.body;
+  const token = uuid();
+  const mailOptions = {
+    from: "muse.team.assembler@gmail.com",
+    to: email,
+    subject: "Muze team",
+    text: `Hi,
+    
+To reset your Muze account password, follow this link: 127.0.0.1:5173/resetpassword/${token}
+
+If you did not request any password reset in Muze App, please ignore this message.
+
+Muze Team
+`,
+  };
+  transporter.sendMail(mailOptions, function (error, info) {
+    if (error) {
+      console.log(error);
+    }
+  });
+  const user = await User.findOne({
+    email: email,
+  });
+
+  if (!user) {
+    return res.status(400).json({ ok: false, message: "Not a valid user" });
+  }
+  user.resetToken = token;
+  user.save();
+};
+
+const resetPasswordChange = async (req, res) => {
+  const { token, newPassword, repeatNewPassword } = req.body;
+  const user = await User.findOne({ resetToken: token });
+
+  if (!user) {
+    return res.status(400).json({ ok: false, message: "Invalid token" });
+  }
+
+  if (newPassword !== repeatNewPassword) {
+    return res
+      .status(400)
+      .json({ ok: false, message: "Password do not match" });
+  }
+  const salt = bcrypt.genSaltSync(10);
+  const hashedPassword = bcrypt.hashSync(newPassword, salt);
+  user.password = hashedPassword;
+  user.token = "empty";
+  await user.save();
+  return res
+    .status(200)
+    .json({ ok: true, message: "Your Password has been changed" });
+};
+
 module.exports = {
   register,
   logInUser,
@@ -471,4 +543,6 @@ module.exports = {
   updateProfileImage,
   addToPlaylist,
   toggleFollowAlbum,
+  resetPassword,
+  resetPasswordChange,
 };

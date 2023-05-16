@@ -72,7 +72,7 @@ const UserSchema = new mongoose.Schema({
   },
   uploadedTracks: {
     type: [mongoose.Schema.Types.ObjectId],
-    ref: "UploadedTrack",
+    ref: "Track",
     required: true,
     default: [],
   },
@@ -81,7 +81,16 @@ const UserSchema = new mongoose.Schema({
     ref: "Album",
     required: true,
     default: [],
-  }
+  },
+  playerQueue: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Play Queue",
+  },
+  resetToken: {
+    type: String,
+    required: true,
+    default: "empty",
+  },
 });
 const User = mongoose.model("User", UserSchema);
 module.exports = User;

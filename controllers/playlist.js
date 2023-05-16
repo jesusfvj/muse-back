@@ -432,12 +432,6 @@ const updatePlaylist = async (req, res) => {
   const file = req.files[0];
 
   try {
-    if (!file) {
-      return res.status(503).json({
-        ok: false,
-        msg: "No files uploaded",
-      });
-    }
     if (file) {
       //Upload thumbnail to Cloudinary
       const resultImage = await uploadImage(file.path)
@@ -473,6 +467,18 @@ const updatePlaylist = async (req, res) => {
         newName: name,
         thumbnail: url,
         color: color
+      });
+    } else {
+      await Playlist.findOneAndUpdate({
+        _id: playlistId
+      }, {
+        $set: {
+          name: name
+        }
+      })
+      return res.status(201).json({
+        ok: true,
+        newName: name
       });
     }
   } catch (error) {

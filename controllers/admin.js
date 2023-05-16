@@ -124,116 +124,6 @@ const getSongs = async (req, res) => {
     }
 };
 
-/* const getSearchElement = async (req, res) => {
-    const {
-        dbCollection,
-        key,
-        value
-    } = req.body
-
-        console.log(dbCollection, key, value)
-    try {
-      
-      await dbConnection();
-
-        const pipeline = [{
-                $match: {
-                    [key]: ObjectId(value)
-                }
-            },
-            {
-                $lookup: {
-                    from: "users",
-                    localField: key,
-                    foreignField: "following",
-                    as: "Followers"
-                }
-            },
-            {
-                $lookup: {
-                    from: "users",
-                    localField: key,
-                    foreignField: "followedBy",
-                    as: "Following"
-                }
-            },
-            {
-                $lookup: {
-                    from: "albums",
-                    localField: key,
-                    foreignField: "artist",
-                    as: "Your albums"
-                }
-            },
-            {
-                $lookup: {
-                    from: "albums",
-                    localField: key,
-                    foreignField: "followedBy",
-                    as: "Following albums"
-                }
-            },
-            {
-                $lookup: {
-                    from: "tracks",
-                    localField: key,
-                    foreignField: "artist",
-                    as: "Your songs"
-                }
-            },
-            {
-                $lookup: {
-                    from: "tracks",
-                    localField: key,
-                    foreignField: "followedBy",
-                    as: "Following songs"
-                }
-            },
-        ]
-
-        let result = []
-        switch (dbCollection) {
-            case "users":
-            case "artists":
-                result = await mongoose.connection.db
-                    .collection("users")
-                    .aggregate(pipeline)
-                    .toArray();
-                break;
-            case "playlists":
-                result = await db.playlists.aggregate(pipeline).toArray();
-                break;
-            case "albums":
-                result = await db.albums.aggregate(pipeline).toArray();
-                break;
-            case "tracks":
-                result = await db.tracks.aggregate(pipeline).toArray();
-                break;
-            default:
-                break;
-        }
-        console.log(result)
-        if (result.length === 0) {
-            return res.status(503).json({
-                ok: false,
-                msg: "The search returned an empty array"
-            });
-        }
-        console.log("A")
-        return res.status(201).json({
-            ok: true,
-            result: result,
-        });
-
-    } catch (error) {
-        console.log(error);
-        return res.status(503).json({
-            ok: false,
-            msg: "Oops, something happened",
-        });
-    }
-} */
-
 const getSearchElement = async (req, res) => {
     const {
         value
@@ -306,10 +196,6 @@ const getSearchElement = async (req, res) => {
               });
 
             results.push(addedDocument);
-            /* results.push({
-                collection,
-                documents,
-            }); */
         }
 
         const flattenedArrayResults = results.flat();
@@ -326,7 +212,6 @@ const getSearchElement = async (req, res) => {
         });
     }
 }
-
 
 module.exports = {
     getUsers,

@@ -23,5 +23,7 @@ app.use("/track", trackRouter);
 app.use("/search", searchRouter);
 app.use("/queue", queueRouter);
 app.use("/album", albumRouter);
+app.use("/admin", adminRouter);
+app.use("/stripe", StripeRouter);
 
 module.exports = app;

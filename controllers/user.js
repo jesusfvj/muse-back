@@ -191,7 +191,7 @@ const getUserById = async (req, res) => {
           path: "artist",
         },
       })
-      .populate({ path: "albums", populate: { path: "artist" } })
+      .populate({ path: "albums", populate: { path: "artist" }, populate: {path: "songs"} })
       .populate("following")
       .populate({
         path: "playerQueue",

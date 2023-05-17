@@ -97,6 +97,13 @@ const logInUser = async (req, res) => {
       });
     }
 
+    if (userFromDb.isBanned===true) {
+      return res.status(200).json({
+        ok: false,
+        msg: "Your account has being banned due to the violation of our company policy. Please contact us for further information.",
+      });
+    }
+
     const comparedPassword = bcrypt.compareSync(password, userFromDb.password);
 
     if (!comparedPassword) {

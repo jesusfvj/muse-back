@@ -35,6 +35,10 @@ const albumSchema = new mongoose.Schema({
     type: [mongoose.Schema.Types.ObjectId],
     ref: "User",
   },
+  isBanned:{
+    type: Boolean,
+    default: false
+  }
 });
 
 const Album = mongoose.model("Album", albumSchema);

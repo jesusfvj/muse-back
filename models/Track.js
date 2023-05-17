@@ -50,6 +50,10 @@ const trackSchema = new mongoose.Schema({
   album: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Album"
+  },
+  isBanned:{
+    type: Boolean,
+    default: false
   }
 });
 

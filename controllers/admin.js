@@ -1,119 +1,75 @@
-const User = require("../models/User");
-const Playlist = require("../models/Playlist");
-const Album = require("../models/Album");
-const Track = require("../models/Track");
-const {
-    dbConnection
-} = require('../database/config.js');
 const mongoose = require("mongoose");
 
-const getUsers = async (req, res) => {
+const getCollection = async (req, res) => {
+    const {
+        collection,
+        role
+    } = req.body
     try {
-        const users = await User.find({
-            role: "user"
+
+        const Model = mongoose.model(collection);
+
+        const collectionObject = await Model.find({
+            $or: [{
+                role: role
+            }],
         }, {
+            __v: 0,
+            color: 0,
             password: 0,
-            __v: 0,
-            profilePhotoCloudinaryId: 0,
             resetToken: 0,
-            playerQueue: 0
-        })
-
-        return res.status(200).json({
-            ok: true,
-            object: users,
-            title: "user"
-        });
-    } catch (error) {
-        console.log(error);
-        return res.status(503).json({
-            ok: false,
-            msg: "Oops, something happened",
-        });
-    }
-};
-
-const getArtists = async (req, res) => {
-    try {
-        const users = await User.find({
-            role: "artist"
-        }, {
-            password: 0,
-            __v: 0,
-            profilePhotoCloudinaryId: 0,
-            resetToken: 0,
-            playerQueue: 0
-        })
-
-        return res.status(200).json({
-            ok: true,
-            object: users,
-            title: "artist"
-        });
-    } catch (error) {
-        console.log(error);
-        return res.status(503).json({
-            ok: false,
-            msg: "Oops, something happened",
-        });
-    }
-};
-
-const getPlaylists = async (req, res) => {
-    try {
-        const playlists = await Playlist.find({}, {
-            __v: 0,
-            thumbnailCloudinaryId: 0,
-            color: 0
-        })
-
-        return res.status(200).json({
-            ok: true,
-            object: playlists,
-            title: "playlist"
-        });
-    } catch (error) {
-        console.log(error);
-        return res.status(503).json({
-            ok: false,
-            msg: "Oops, something happened",
-        });
-    }
-};
-
-const getAlbums = async (req, res) => {
-    try {
-        const albums = await Album.find({}, {
-            __v: 0,
-            thumbnailCloudinaryId: 0,
-        })
-
-        return res.status(200).json({
-            ok: true,
-            object: albums,
-            title: "album"
-        });
-    } catch (error) {
-        console.log(error);
-        return res.status(503).json({
-            ok: false,
-            msg: "Oops, something happened",
-        });
-    }
-};
-
-const getSongs = async (req, res) => {
-    try {
-        const tracks = await Track.find({}, {
-            __v: 0,
+            playerQueue: 0,
             trackCloudinaryId: 0,
-            thumbnailCloudinaryId: 0
-        })
+            thumbnailCloudinaryId: 0,
+            profilePhotoCloudinaryId: 0,
+        });
 
         return res.status(200).json({
             ok: true,
-            object: tracks,
-            title: "track"
+            object: collectionObject,
+            title: collection.toLowerCase()
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(503).json({
+            ok: false,
+            msg: "Oops, something happened",
+        });
+    }
+};
+
+const toggleBanAsset = async (req, res) => {
+    const {
+        collection,
+        assetId,
+        banTheAsset
+    } = req.body
+
+    try {
+
+        const Model = mongoose.model(collection);
+
+        await Model.findOneAndUpdate({
+            _id: assetId,
+        }, {
+            $set: {
+                isBanned: banTheAsset,
+            },
+        }, {
+            new: true,
+        }, {
+            __v: 0,
+            color: 0,
+            password: 0,
+            resetToken: 0,
+            playerQueue: 0,
+            trackCloudinaryId: 0,
+            thumbnailCloudinaryId: 0,
+            profilePhotoCloudinaryId: 0,
+        });
+        return res.status(200).json({
+            ok: true,
+            assetId: assetId
         });
     } catch (error) {
         console.log(error);
@@ -191,9 +147,14 @@ const getSearchElement = async (req, res) => {
                 profilePhotoCloudinaryId: 0,
             });
 
-            const addedDocument = documents.map(({_doc}) => {
-                return ({collection: collection, ..._doc });
-              });
+            const addedDocument = documents.map(({
+                _doc
+            }) => {
+                return ({
+                    collection: collection,
+                    ..._doc
+                });
+            });
 
             results.push(addedDocument);
         }
@@ -214,10 +175,7 @@ const getSearchElement = async (req, res) => {
 }
 
 module.exports = {
-    getUsers,
-    getArtists,
-    getPlaylists,
-    getAlbums,
-    getSongs,
-    getSearchElement
+    toggleBanAsset,
+    getSearchElement,
+    getCollection,
 };

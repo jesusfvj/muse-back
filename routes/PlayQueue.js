@@ -9,9 +9,9 @@ const {
 const queueRouter = express.Router();
 
 queueRouter.get("/getQueue", getQueue);
-queueRouter.put("/addToQueue", addToQueue);
 queueRouter.post("/createQueue", createQueue);
 queueRouter.post("/removeFromQueue", removeFromQueue);
 queueRouter.post("/index", changeIndex);
+queueRouter.post("/addToQueue", addToQueue);
 
 module.exports = queueRouter;

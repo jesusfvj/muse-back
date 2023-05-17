@@ -31,34 +31,34 @@ const getQueue = async (req, res) => {
   }
 };
 
-const addToQueue = async (req, res) => {
-  const { loggedUserId, trackId } = req.body;
-  try {
-    const logedUserQueue = await PlayQueue.findOne({ userId: loggedUserId });
-    let lastOrder =
-      logedUserQueue.tracks.length > 0
-        ? logedUserQueue.tracks[logedUserQueue.tracks.length - 1].order
-        : 0;
-    const tracks = trackId.map((id, index) => {
-      return { trackId: id, order: lastOrder + index + 1 };
-    });
-    await PlayQueue.updateOne(
-      { userId: loggedUserId },
-      { $push: { tracks: { $each: tracks } } }
-    );
-    const updatedQueue = await PlayQueue.findOne({ userId: loggedUserId });
+// const addToQueue = async (req, res) => {
+//   const { loggedUserId, trackId } = req.body;
+//   try {
+//     const logedUserQueue = await PlayQueue.findOne({ userId: loggedUserId });
+//     let lastOrder =
+//       logedUserQueue.tracks.length > 0
+//         ? logedUserQueue.tracks[logedUserQueue.tracks.length - 1].order
+//         : 0;
+//     const tracks = trackId.map((id, index) => {
+//       return { trackId: id, order: lastOrder + index + 1 };
+//     });
+//     await PlayQueue.updateOne(
+//       { userId: loggedUserId },
+//       { $push: { tracks: { $each: tracks } } }
+//     );
+//     const updatedQueue = await PlayQueue.findOne({ userId: loggedUserId });
 
-    return res.status(200).json({
-      ok: true,
-      playQueue: updatedQueue,
-    });
-  } catch (error) {
-    return res.status(503).json({
-      ok: false,
-      error: error,
-    });
-  }
-};
+//     return res.status(200).json({
+//       ok: true,
+//       playQueue: updatedQueue,
+//     });
+//   } catch (error) {
+//     return res.status(503).json({
+//       ok: false,
+//       error: error,
+//     });
+//   }
+// };
 
 const removeFromQueue = async (req, res) => {
   const { loggedUserId, trackId } = req.body;
@@ -152,6 +152,29 @@ const changeIndex = async (req, res) => {
 
     return res.status(200).json({
       ok: true,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(503).json({
+      ok: false,
+      error: error,
+    });
+  }
+};
+
+const addToQueue = async (req, res) => {
+  const { index, tracksToAdd, userId } = req.body;
+  const newTracks = tracksToAdd.flat().map((track) => track._id);
+
+  try {
+    const playQueue = await PlayQueue.findOne({ userId: userId });
+    playQueue.tracks.splice(index + 1, 0, ...newTracks);
+
+    await playQueue.save();
+    await playQueue.populate({ path: "tracks", populate: "artist" });
+    return res.status(200).json({
+      ok: true,
+      playQueue,
     });
   } catch (error) {
     console.log(error);

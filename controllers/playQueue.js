@@ -94,15 +94,15 @@ const removeFromQueue = async (req, res) => {
 };
 
 const createQueue = async (req, res) => {
-  const { userId, trackId } = req.body;
-  console.log(req.body);
+  const { userId, trackId, index } = req.body;
+
   try {
     const loggedUserQueue = await PlayQueue.findOne({ userId: userId });
 
     if (loggedUserQueue) {
       const updatedQueue = await PlayQueue.findOneAndUpdate(
         { userId: userId },
-        { $set: { tracks: [...trackId] }, index: 0 },
+        { $set: { tracks: [...trackId] }, index: index },
         { new: true }
       ).populate({ path: "tracks", populate: "artist" });
       return res.status(200).json({
@@ -113,7 +113,7 @@ const createQueue = async (req, res) => {
       const newQueue = new PlayQueue({
         userId,
         tracks: [...trackId],
-        index: 0,
+        index: index,
       });
 
       await newQueue.save();
@@ -140,4 +140,32 @@ const createQueue = async (req, res) => {
   }
 };
 
-module.exports = { getQueue, addToQueue, removeFromQueue, createQueue };
+const changeIndex = async (req, res) => {
+  const { index, userId } = req.body;
+
+  try {
+    await PlayQueue.findOneAndUpdate(
+      { userId: userId },
+      { $set: { index: index } },
+      { new: true }
+    );
+
+    return res.status(200).json({
+      ok: true,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(503).json({
+      ok: false,
+      error: error,
+    });
+  }
+};
+
+module.exports = {
+  getQueue,
+  addToQueue,
+  removeFromQueue,
+  createQueue,
+  changeIndex,
+};

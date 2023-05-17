@@ -10,6 +10,11 @@ const playQueueSchema = new mongoose.Schema({
     ref: "Track",
     required: true,
   },
+  index: {
+    type: Number,
+    required: true,
+    default: 0,
+  },
 });
 
 const PlayQueue = mongoose.model("Play Queue", playQueueSchema);

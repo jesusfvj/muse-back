@@ -86,7 +86,9 @@ const logInUser = async (req, res) => {
   try {
     const userFromDb = await User.findOne({
       email,
-    }).populate("playlists");
+    })
+      .populate("playlists")
+      .populate("playerQueue");
 
     if (!userFromDb) {
       return res.status(400).json({
@@ -189,8 +191,17 @@ const getUserById = async (req, res) => {
           path: "artist",
         },
       })
-      .populate("albums")
-      .populate("following");
+      .populate({ path: "albums", populate: { path: "artist" } })
+      .populate("following")
+      .populate({
+        path: "playerQueue",
+        populate: {
+          path: "tracks",
+          populate: {
+            path: "artist",
+          },
+        },
+      });
 
     if (!user) {
       return res.status(200).json({

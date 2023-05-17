@@ -265,12 +265,6 @@ const updateTrack = async (req, res) => {
   const file = req.files[0];
 
   try {
-    if (!file) {
-      return res.status(503).json({
-        ok: false,
-        msg: "No files uploaded",
-      });
-    }
     if (file) {
       //Upload thumbnail to Cloudinary
       const resultImage = await uploadImage(file.path);
@@ -309,6 +303,18 @@ const updateTrack = async (req, res) => {
         ok: true,
         newName: name,
         thumbnail: url,
+      });
+    }else {
+      await Track.findOneAndUpdate({
+        _id: trackId
+      }, {
+        $set: {
+          name: name
+        }
+      })
+      return res.status(201).json({
+        ok: true,
+        newName: name
       });
     }
   } catch (error) {

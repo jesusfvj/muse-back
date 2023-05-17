@@ -1,16 +1,25 @@
 const Album = require("../models/Album");
 const User = require("../models/User");
-const { deleteCloudinaryFile, uploadImage } = require("../utils/cloudinary");
+const {
+  deleteCloudinaryFile,
+  uploadImage
+} = require("../utils/cloudinary");
 const fs = require("fs-extra");
+
 const getAlbums = async (req, res) => {
   try {
     const albums = await Album.find({})
       .populate("artist")
       .populate("songs")
-      .sort({ followedBy: -1 })
+      .sort({
+        followedBy: -1
+      })
       .limit(20);
 
-    return res.status(200).json({ ok: true, albums });
+    return res.status(200).json({
+      ok: true,
+      albums
+    });
   } catch (error) {
     console.log(error);
     return res.status(503).json({
@@ -21,13 +30,20 @@ const getAlbums = async (req, res) => {
 };
 
 const getAlbumById = async (req, res) => {
-  const { id } = req.params;
+  const {
+    id
+  } = req.params;
   try {
-    const album = await Album.findOne({ _id: id })
+    const album = await Album.findOne({
+        _id: id
+      })
       .populate("artist")
       .populate("songs");
 
-    return res.status(200).json({ ok: true, album });
+    return res.status(200).json({
+      ok: true,
+      album
+    });
   } catch (error) {
     console.log(error);
     return res.status(503).json({
@@ -100,12 +116,6 @@ const updateAlbum = async (req, res) => {
   const file = req.files[0]
 
   try {
-    if (!file) {
-      return res.status(503).json({
-        ok: false,
-        msg: "No files uploaded",
-      });
-    }
     if (file) {
       //Upload thumbnail to Cloudinary
       const resultImage = await uploadImage(file.path)
@@ -138,6 +148,18 @@ const updateAlbum = async (req, res) => {
         ok: true,
         newName: name,
         thumbnail: url
+      });
+    } else {
+      await Album.findOneAndUpdate({
+        _id: albumId
+      }, {
+        $set: {
+          name: name
+        }
+      })
+      return res.status(201).json({
+        ok: true,
+        newName: name
       });
     }
   } catch (error) {

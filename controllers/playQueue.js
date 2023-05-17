@@ -95,7 +95,7 @@ const removeFromQueue = async (req, res) => {
 
 const createQueue = async (req, res) => {
   const { userId, trackId, index } = req.body;
-  
+
   try {
     const loggedUserQueue = await PlayQueue.findOne({ userId: userId });
 
@@ -140,4 +140,32 @@ const createQueue = async (req, res) => {
   }
 };
 
-module.exports = { getQueue, addToQueue, removeFromQueue, createQueue };
+const changeIndex = async (req, res) => {
+  const { index, userId } = req.body;
+
+  try {
+    await PlayQueue.findOneAndUpdate(
+      { userId: userId },
+      { $set: { index: index } },
+      { new: true }
+    );
+
+    return res.status(200).json({
+      ok: true,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(503).json({
+      ok: false,
+      error: error,
+    });
+  }
+};
+
+module.exports = {
+  getQueue,
+  addToQueue,
+  removeFromQueue,
+  createQueue,
+  changeIndex,
+};

@@ -39,6 +39,10 @@ const playlistSchema = new mongoose.Schema({
   copyFrom:{
     type: mongoose.Schema.Types.ObjectId,
     required: false
+  },
+  isBanned:{
+    type: Boolean,
+    default: false
   }
 });
 

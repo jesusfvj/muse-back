@@ -535,7 +535,7 @@ const updatePasswordProfile = async (req, res) => {
   const { userId, newPassword, confirmPassword } = req.body;
   try {
     const user = await User.findById(userId);
-    console.log(user)
+   
   if (!user) {
     return res.status(404).json({ ok: false, message: "User not found" });
   }
@@ -544,7 +544,6 @@ const updatePasswordProfile = async (req, res) => {
     .status(400)
     .json({ ok: false, message: "Password do not match" });
   }
-  console.log("here")
   const salt = bcrypt.genSaltSync(10);
   const hashedPassword = bcrypt.hashSync(newPassword, salt);
   user.password = hashedPassword;

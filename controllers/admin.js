@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 
 const getCollection = async (req, res) => {
+    console.log('here')
     const {
         collection,
         role

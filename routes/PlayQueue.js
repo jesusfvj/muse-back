@@ -7,11 +7,12 @@ const {
   changeIndex,
 } = require("../controllers/playQueue");
 const queueRouter = express.Router();
+const checkJWT = require("../middlewares/checkJWT");
 
-queueRouter.get("/getQueue", getQueue);
-queueRouter.post("/createQueue", createQueue);
-queueRouter.post("/removeFromQueue", removeFromQueue);
-queueRouter.post("/index", changeIndex);
-queueRouter.post("/addToQueue", addToQueue);
+queueRouter.get("/getQueue", checkJWT, getQueue);
+queueRouter.post("/createQueue", checkJWT, createQueue);
+queueRouter.post("/removeFromQueue", checkJWT, removeFromQueue);
+queueRouter.post("/index", checkJWT, changeIndex);
+queueRouter.post("/addToQueue", checkJWT, addToQueue);
 
 module.exports = queueRouter;

@@ -1,5 +1,6 @@
 const express = require("express");
 const trackRouter = express.Router();
+const checkJWT = require("../middlewares/checkJWT");
 const {
   addTracks,
   uploadNewSongs,
@@ -13,11 +14,11 @@ const multer = require("multer");
 const upload = multer({ dest: "./uploads" });
 
 // addPlaylist body = { loggedUserId, playlistId, isAdded:Boolean }
-trackRouter.post("/addToLibrary", addTracks);
-trackRouter.post("/uploadNewSongs/:userId", upload.any(), uploadNewSongs);
-trackRouter.get("/", getTracks);
-trackRouter.get("/id/:id", getTrackById);
-trackRouter.put('/update/:trackId', upload.any(), updateTrack);
-trackRouter.post("/delete", deleteTrack);
+trackRouter.post("/addToLibrary", checkJWT, addTracks);
+trackRouter.post("/uploadNewSongs/:userId", checkJWT, upload.any(), uploadNewSongs);
+trackRouter.get("/", checkJWT, getTracks);
+trackRouter.get("/id/:id", checkJWT, getTrackById);
+trackRouter.put('/update/:trackId', checkJWT, upload.any(), updateTrack);
+trackRouter.post("/delete", checkJWT, deleteTrack);
 
 module.exports = trackRouter;

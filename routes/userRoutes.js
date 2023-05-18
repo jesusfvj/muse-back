@@ -1,6 +1,7 @@
 const express = require("express");
 const userRouter = express.Router();
 const multer = require("multer");
+const checkJWT = require("../middlewares/checkJWT");
 const {
   register,
   logInUser,
@@ -25,29 +26,29 @@ userRouter.post("/register", register);
 // Login body = { email, password }
 userRouter.post("/login", logInUser);
 // FollowUser body = { loggedUserId, followedUserId, isFollowing:Boolean }
-userRouter.post("/followUser", followUser);
+userRouter.post("/followUser", checkJWT, followUser);
 
-userRouter.get("/artists/:id", getArtists);
+userRouter.get("/artists/:id", checkJWT, getArtists);
 
-userRouter.get("/artist/:id", getArtistById);
+userRouter.get("/artist/:id", checkJWT, getArtistById);
 
-userRouter.get("/followedusers/:id", getFollowedUsers);
+userRouter.get("/followedusers/:id", checkJWT, getFollowedUsers);
 
-userRouter.get("/:id", getUserById);
+userRouter.get("/:id", checkJWT, getUserById);
 
-userRouter.put("/update-username", updateUsername);
+userRouter.put("/update-username", checkJWT, updateUsername);
 
-userRouter.put("/uploadProfileImage/:userId", upload.any(), updateProfileImage);
+userRouter.put("/uploadProfileImage/:userId", checkJWT, upload.any(), updateProfileImage);
 // cambiar nombre de usuario
 // userRouter.put("/:id", userExists, updateUser);
 
 // userRouter.delete("/delete", deleteUser);
 
-userRouter.post("/playlist/addtrack", addToPlaylist);
+userRouter.post("/playlist/addtrack", checkJWT, addToPlaylist);
 
-userRouter.put("/toggleFollowPlaylist", toggleFollowAlbum);
-userRouter.post("/resetpassword", resetPassword);
-userRouter.post("/resetpasswordchange", resetPasswordChange);
-userRouter.post("/resetpasswordprofile", updatePasswordProfile);
+userRouter.put("/toggleFollowPlaylist", checkJWT, toggleFollowAlbum);
+userRouter.post("/resetpassword", checkJWT, resetPassword);
+userRouter.post("/resetpasswordchange", checkJWT, resetPasswordChange);
+userRouter.post("/resetpasswordprofile", checkJWT, updatePasswordProfile);
 
 module.exports = userRouter;

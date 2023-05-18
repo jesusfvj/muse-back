@@ -3,7 +3,7 @@ const Playlist = require("../models/Playlist");
 const User = require("../models/User");
 const Album = require("../models/Album");
 const mongoose = require("mongoose");
-// const generateJWT = require("generateJWT");
+const generateJWT = require("../helpers/generateJWT");
 const nodemailer = require("nodemailer");
 const { uploadImage, deleteCloudinaryFile } = require("../utils/cloudinary");
 const fs = require("fs-extra");
@@ -68,9 +68,11 @@ const register = async (req, res) => {
     await newUser.save();
     newUser.password = undefined;
 
+    const token = await generateJWT(newUser._id);
+
     return res.status(201).json({
       ok: true,
-      user: newUser,
+      user: {...newUser._doc, token},
     });
   } catch (error) {
     console.log(error);
@@ -112,11 +114,12 @@ const logInUser = async (req, res) => {
         msg: "Email and password don't match.",
       });
     }
-    // const token = await generateJWT(userFromDb._id)
+
+    const token = await generateJWT(userFromDb._id)
     userFromDb.password = undefined;
     return res.status(200).json({
       ok: true,
-      user: userFromDb, // add token
+      user: {...userFromDb._doc, token},
     });
   } catch (error) {
     console.log(error);
@@ -291,7 +294,6 @@ const updateUsername = async (req, res) => {
         new: true,
       } // options
     );
-    console.log(newUser);
     return res.status(200).json({
       ok: true,
       newUser,
@@ -305,7 +307,6 @@ const updateUsername = async (req, res) => {
 };
 
 const getArtistById = async (req, res) => {
-  console.log(req.params);
   const { id } = req.params;
 
   try {

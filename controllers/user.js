@@ -1,13 +1,45 @@
 const bcrypt = require("bcryptjs");
 const Playlist = require("../models/Playlist");
 const User = require("../models/User");
+const Album = require("../models/Album");
+const mongoose = require("mongoose");
 // const generateJWT = require("generateJWT");
+const nodemailer = require("nodemailer");
+const { uploadImage, deleteCloudinaryFile } = require("../utils/cloudinary");
+const fs = require("fs-extra");
+require("dotenv").config();
+const { uuid } = require("uuidv4");
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: "muse.team.assembler@gmail.com",
+    pass: process.env.PASS,
+  },
+});
 
 const register = async (req, res) => {
   const { fullName, email, password, repPassword, isArtist } = req.body;
 
+  const mailOptions = {
+    from: "muse.team.assembler@gmail.com",
+    to: email,
+    subject: "Muze team",
+    text: `Hi ${fullName}, thanks for registering Muze!`,
+  };
+
   try {
-    const user = await User.findOne({ email });
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log("Email sent: " + info.response);
+      }
+    });
+
+    const user = await User.findOne({
+      email,
+    });
 
     if (user) {
       return res.status(409).json({
@@ -52,12 +84,23 @@ const register = async (req, res) => {
 const logInUser = async (req, res) => {
   const { email, password } = req.body;
   try {
-    const userFromDb = await User.findOne({ email });
+    const userFromDb = await User.findOne({
+      email,
+    })
+      .populate("playlists")
+      .populate("playerQueue");
 
     if (!userFromDb) {
       return res.status(400).json({
         ok: false,
         msg: "Email and password don't match.",
+      });
+    }
+
+    if (userFromDb.isBanned===true) {
+      return res.status(200).json({
+        ok: false,
+        msg: "Your account has being banned due to the violation of our company policy. Please contact us for further information.",
       });
     }
 
@@ -86,21 +129,41 @@ const logInUser = async (req, res) => {
 
 const followUser = async (req, res) => {
   const { loggedUserId, followedUserId, isFollowing } = req.body;
-  console.log(loggedUserId, followedUserId, isFollowing);
+
   try {
-    const loggedUser = await User.findOne({ _id: loggedUserId });
-    const followedUser = await User.findOne({ _id: followedUserId });
+    const loggedUser = await User.findOne({
+      _id: loggedUserId,
+    });
+    const followedUser = await User.findOne({
+      _id: followedUserId,
+    });
 
     if (isFollowing) {
-      await loggedUser.updateOne({ $push: { following: followedUserId } });
-      await followedUser.updateOne({ $push: { followedBy: loggedUserId } });
+      await loggedUser.updateOne({
+        $push: {
+          following: followedUserId,
+        },
+      });
+      await followedUser.updateOne({
+        $push: {
+          followedBy: loggedUserId,
+        },
+      });
       return res.status(200).json({
         ok: true,
         isFollowing,
       });
     } else {
-      await loggedUser.updateOne({ $pull: { following: followedUserId } });
-      await followedUser.updateOne({ $pull: { followedBy: loggedUserId } });
+      await loggedUser.updateOne({
+        $pull: {
+          following: followedUserId,
+        },
+      });
+      await followedUser.updateOne({
+        $pull: {
+          followedBy: loggedUserId,
+        },
+      });
       return res.status(200).json({
         ok: true,
         isFollowing,

@@ -19,15 +19,30 @@ const playlistSchema = new mongoose.Schema({
   followedBy: {
     type: [mongoose.Schema.Types.ObjectId],
     ref: "User",
+    default:[]
   },
   isPrivate: {
     type: Boolean,
     default: false,
   },
-  thumbnail:{
+  thumbnail: {
     type: String,
-    required: false,
-    default: ""
+    required: true,
+  },
+  thumbnailCloudinaryId: {
+    type: String,
+    required: true,
+  },
+  color:{
+    type: String
+  },
+  copyFrom:{
+    type: mongoose.Schema.Types.ObjectId,
+    required: false
+  },
+  isBanned:{
+    type: Boolean,
+    default: false
   }
 });
 

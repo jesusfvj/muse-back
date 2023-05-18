@@ -13,4 +13,11 @@ userRouter.get("/getArtists", getArtists);
 
 // userRouter.delete("/delete", deleteUser);
 
+userRouter.post("/playlist/addtrack", addToPlaylist);
+
+userRouter.put("/toggleFollowPlaylist", toggleFollowAlbum);
+userRouter.post("/resetpassword", resetPassword);
+userRouter.post("/resetpasswordchange", resetPasswordChange);
+userRouter.post("/resetpasswordprofile", updatePasswordProfile);
+
 module.exports = userRouter;

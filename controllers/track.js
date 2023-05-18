@@ -1,4 +1,40 @@
-const Track = require('../models/Track')
+const Track = require("../models/Track");
+const Album = require("../models/Album");
+const User = require("../models/User");
+const fs = require("fs-extra");
+
+const {
+  uploadImage,
+  uploadSong,
+  deleteCloudinaryFile,
+} = require("../utils/cloudinary");
+const {
+  grouperDataFunction,
+  deleteFilesFromUploadFolder,
+  formatDuration,
+  getAudioDuration,
+} = require("../utils/uploadNewSongsFunctions");
+const Playlist = require("../models/Playlist");
+
+const getTracks = async (req, res) => {
+  try {
+    const tracks = await Track.find({})
+      .populate("artist")
+      .sort({ followedBy: -1 })
+      .limit(20);
+
+    return res.status(200).json({
+      ok: true,
+      tracks,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(503).json({
+      ok: false,
+      msg: "Oops, something happened",
+    });
+  }
+};
 
 const getTracks = async (req, res) => {
     const {loggedUserId, query = ""} = req.body

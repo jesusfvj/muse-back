@@ -13,12 +13,17 @@ const albumSchema = new mongoose.Schema({
   uploadedAt: {
     type: Date,
     required: true,
+    default: Date.now,
   },
   genre: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Genre",
   },
-  thumbnail: {
+  thumbnailUrl: {
+    type: String,
+    required: true,
+  },
+  thumbnailCloudinaryId: {
     type: String,
     required: true,
   },
@@ -30,6 +35,10 @@ const albumSchema = new mongoose.Schema({
     type: [mongoose.Schema.Types.ObjectId],
     ref: "User",
   },
+  isBanned:{
+    type: Boolean,
+    default: false
+  }
 });
 
 const Album = mongoose.model("Album", albumSchema);

@@ -1,6 +1,32 @@
 const Track = require('../models/Track')
 
-const addTracks = async (req, res) => {
+const getTracks = async (req, res) => {
+    const {loggedUserId, query = ""} = req.body
+    try {
+        const loggedUser = await User.findOne({ _id: loggedUserId });
+        const trackIds = loggedUser.tracks;
+        const tracks = await Track.find({ 
+            _id: { $in: trackIds },
+            $or: [
+              { name: { $regex: query, $options: 'i' } },
+              { genre: { $regex: query, $options: 'i' } },
+              { artist: { $regex: query, $options: 'i' } },
+            ]
+          });
+          return res.status(200).json({
+            ok: true,
+            loggedUserId,
+            tracks
+        });
+    } catch (error) {
+        return res.status(503).json({
+            ok: false,
+            msg: "Oops, something happened",
+        });
+    }
+   
+}
+const likeTracks = async (req, res) => {
     const { loggedUserId, trackId, isAdded } = req.body
     try {
         const loggedUser = await User.findOne({ _id: loggedUserId });
@@ -29,4 +55,4 @@ const addTracks = async (req, res) => {
     }
 }
 
-module.exports = { addTracks }
+module.exports = { likeTracks, getTracks }

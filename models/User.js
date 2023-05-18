@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const UserSchema =  new mongoose.Schema({
+const UserSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
@@ -36,6 +36,12 @@ const UserSchema =  new mongoose.Schema({
     required: false,
     default: [],
   },
+  followedPlaylists: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: "Playlist",
+    required: true,
+    default: [],
+  },
   playlists: {
     type: [mongoose.Schema.Types.ObjectId],
     ref: "Playlist",
@@ -56,7 +62,38 @@ const UserSchema =  new mongoose.Schema({
   },
   profilePhoto: {
     type: String,
-    required: false,
+    required: true,
+    default: "https://spanishbit.es/no-profile.jpg",
+  },
+  profilePhotoCloudinaryId: {
+    type: String,
+    required: true,
+    default: "empty",
+  },
+  uploadedTracks: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: "Track",
+    required: true,
+    default: [],
+  },
+  uploadedAlbums: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: "Album",
+    required: true,
+    default: [],
+  },
+  playerQueue: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Play Queue",
+  },
+  resetToken: {
+    type: String,
+    required: true,
+    default: "empty",
+  },
+  isBanned:{
+    type: Boolean,
+    default: false
   }
 });
 const User = mongoose.model("User", UserSchema);

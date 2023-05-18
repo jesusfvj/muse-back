@@ -8,6 +8,7 @@ const dbConnection = async () => {
     });
 
     console.log("DB Online");
+   
   } catch (error) {
     console.log(error);
     throw new Error("Could not initialize DB");
@@ -17,3 +18,4 @@ const dbConnection = async () => {
 module.exports = {
   dbConnection,
 };
+module.exports.dbConnection = dbConnection;

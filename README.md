@@ -1,6 +1,6 @@
 # Muze - Backend Application
 
-Muze's backend application is built with Node.js and MongoDB. It serves as the server-side component for the Muze music application, handling user authentication, data storage, and API endpoints. Cloudinary is utilized as a service for file storage that can be managed from the backend with Node.js.
+Muze's backend application is built with Node.js and MongoDB. It serves as the server-side component for the Muze music application, handling user authentication, data storage, and API endpoints. Cloudinary is utilized as a service for file storage that can be managed from the backend with Node.js. Nodemailer is used for sending emails, and Multer is employed for handling file uploads.
 
 ## Installation and Setup
 
@@ -30,7 +30,7 @@ npm install
 
    - `PORT`: The port number for the server to listen on.
    - `MONGODB_URL`: The connection URL for your MongoDB database.
-   - `PASS`: The password for the sent of mails via nodemailer.
+   - `PASS`: The password required for Nodemailer.
    - `CLOUD_NAME`: Your Cloudinary cloud name.
    - `API_KEY`: Your Cloudinary API key.
    - `API_SECRET`: Your Cloudinary API secret.
@@ -52,6 +52,14 @@ The Muze backend application is now up and running.
 
 Cloudinary is a service for file storage that allows you to easily manage and manipulate media assets such as images and videos. In the context of the Muze backend application, Cloudinary is used to handle the upload and download of music files and images associated with artists and users. With the provided Cloudinary API credentials, the Muze backend can seamlessly interact with the Cloudinary service to store and retrieve these media assets.
 
+## Nodemailer
+
+Nodemailer is a module for Node.js that enables easy email sending. In the Muze backend application, Nodemailer is utilized to send emails for various functionalities such as account verification and password reset. By configuring the email transport and using the provided SMTP credentials (including the PASS variable), Nodemailer facilitates the seamless delivery of emails to users.
+
+## Multer
+
+Multer is a middleware for handling multipart/form-data, which is commonly used for file uploads. In the Muze backend application, Multer is employed to handle the uploading of music files and profile pictures for artists and users. It integrates with the Express framework to simplify the process of handling file uploads, ensuring that the uploaded files are properly stored and accessible for further processing.
+
 ## Dependencies
 
 Muze backend relies on the following dependencies:
@@ -63,7 +71,6 @@ Muze backend relies on the following dependencies:
 | cors                      | ^2.8.5    |
 | dotenv                    | ^10.0.0   |
 | express                   | ^4.17.1   |
-| express-fileupload        | ^1.2.1    |
 | jsonwebtoken              | ^8.5.1    |
 | mongoose                  | ^6.1.10   |
 | multer                    | ^1.4.3    |
@@ -79,6 +86,15 @@ We welcome contributions to the Muze backend application! If you find any bugs o
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
+
+## Collaborators
+
+The following GitHub users have contributed to the Muze project:
+
+- [jesusfvj](https://github.com/jesusfvj)
+- [MiquelAbella](https://github.com/MiquelAbella)
+- [landerssini](https://github.com/landerssini)
+- [BertaGN](https://github.com/BertaGN)
 
 ## Acknowledgments
 

@@ -7,4 +7,4 @@ const stripe = require("stripe")('pk_test_51N80saK8GYiDB5U2dA7gHIgSiGYxbueVVFSsP
 stripeRouter.get("/setStripe", setStripe);
 stripeRouter.post("/stripePayment", stripePayment);
 
-module.exports = stripeRouter; 
+module.exports = stripeRouter;

@@ -5,32 +5,55 @@ const Track = require("../models/Track");
 const mongoose = require("mongoose");
 
 const search = async (req, res) => {
-  const { query, uid } = req.params;
+  const {
+    query,
+    uid
+  } = req.params;
   const objectId = new mongoose.Types.ObjectId(uid);
   try {
     const users = await User.find({
-      _id: { $ne: objectId },
+      _id: {
+        $ne: objectId
+      },
       role: "user",
-      fullName: { $regex: new RegExp(query, "i") },
+      fullName: {
+        $regex: new RegExp(query, "i")
+      },
     });
     const artists = await User.find({
-      _id: { $ne: objectId },
-       role: "artist",
-      fullName: { $regex: new RegExp(query, "i") },
+      _id: {
+        $ne: objectId
+      },
+      role: "artist",
+      fullName: {
+        $regex: new RegExp(query, "i")
+      },
     });
     const albums = await Album.find({
-      name: { $regex: new RegExp(query, "i") },
+      name: {
+        $regex: new RegExp(query, "i")
+      },
     });
     const tracks = await Track.find({
-      name: { $regex: new RegExp(query, "i") },
+      name: {
+        $regex: new RegExp(query, "i")
+      },
     });
     const playlists = await Playlist.find({
-      name: { $regex: new RegExp(query, "i") },
+      name: {
+        $regex: new RegExp(query, "i")
+      },
     });
 
     return res.status(200).json({
       ok: true,
-      results: { users, albums, tracks, playlists, artists },
+      results: {
+        users,
+        albums,
+        tracks,
+        playlists,
+        artists
+      },
     });
   } catch (error) {
     console.log(error);
@@ -41,4 +64,6 @@ const search = async (req, res) => {
   }
 };
 
-module.exports = { search };
+module.exports = {
+  search
+};

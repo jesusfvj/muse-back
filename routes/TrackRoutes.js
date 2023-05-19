@@ -13,7 +13,6 @@ const multer = require("multer");
 
 const upload = multer({ dest: "./uploads" });
 
-// addPlaylist body = { loggedUserId, playlistId, isAdded:Boolean }
 trackRouter.post("/addToLibrary", checkJWT, addTracks);
 trackRouter.post("/uploadNewSongs/:userId", checkJWT, upload.any(), uploadNewSongs);
 trackRouter.get("/", checkJWT, getTracks);

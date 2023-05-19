@@ -493,7 +493,7 @@ const resetPassword = async (req, res) => {
     subject: "Muze team",
     text: `Hi,
     
-To reset your Muze account password, follow this link: 127.0.0.1:5173/resetpassword/${token}
+To reset your Muze account password, follow this link: https://master--fanciful-concha-dfdf10.netlify.app/resetpassword/${token}
 
 If you did not request any password reset in Muze App, please ignore this message.
 

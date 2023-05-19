@@ -30,7 +30,7 @@ npm install
 
    - `PORT`: The port number for the server to listen on.
    - `MONGODB_URL`: The connection URL for your MongoDB database.
-   - `PASS`: The password for your MongoDB database.
+   - `PASS`: The password for the sent of mails via nodemailer.
    - `CLOUD_NAME`: Your Cloudinary cloud name.
    - `API_KEY`: Your Cloudinary API key.
    - `API_SECRET`: Your Cloudinary API secret.
@@ -81,7 +81,5 @@ We welcome contributions to the Muze backend application! If you find any bugs o
 This project is licensed under the [MIT License](LICENSE).
 
 ## Acknowledgments
-
-- [OpenAI](https://openai.com) for providing the GPT-3.5 language model used to generate this README file.
 
 Thank you for using the Muze backend application!
